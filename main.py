@@ -4,6 +4,7 @@ import postgres
 import telegram
 
 # Search criteria configuration
+AREA_NAME = "Greenpoint"  # Neighborhood name for display
 AREA_CODE = 301  # Greenpoint area code
 PRICE_MIN = None  # No minimum price
 PRICE_MAX = 4000  # Maximum price
@@ -36,7 +37,7 @@ def print_new_listings(new_listings: List[RentalListing]):
 if __name__ == "__main__":
     print(f"Starting rental search...")
     print(f"Criteria: {BEDROOMS_MIN}-{BEDROOMS_MAX} bedrooms, "
-          f"max ${PRICE_MAX}/month in area {AREA_CODE}")
+          f"max ${PRICE_MAX}/month in {AREA_NAME} (area {AREA_CODE})")
     print("-" * 80)
 
     # Create table if it doesn't exist
@@ -72,7 +73,7 @@ if __name__ == "__main__":
         print_new_listings(new_listings)
 
         # Send via Telegram
-        telegram.send_new_listings(new_listings)
+        telegram.send_new_listings(new_listings, AREA_NAME)
 
         # Write new listings to database
         postgres.write_listings(new_listings)

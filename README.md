@@ -49,10 +49,11 @@ export TELEGRAM_CHAT_ID="123456789"
 Edit `main.py` to adjust your search preferences:
 
 ```python
-AREA_CODE = 301        # Neighborhood code
-PRICE_MAX = 4000       # Maximum rent
-BEDROOMS_MIN = 2       # Minimum bedrooms
-BEDROOMS_MAX = 3       # Maximum bedrooms
+AREA_NAME = "Greenpoint"  # Neighborhood name for display
+AREA_CODE = 301           # Neighborhood code
+PRICE_MAX = 4000          # Maximum rent
+BEDROOMS_MIN = 2          # Minimum bedrooms
+BEDROOMS_MAX = 3          # Maximum bedrooms
 ```
 
 ## Usage

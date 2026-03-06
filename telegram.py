@@ -34,18 +34,20 @@ def send_telegram_message(message: str) -> bool:
     return True
 
 
-def send_new_listings(new_listings: List[RentalListing]):
+def send_new_listings(new_listings: List[RentalListing], neighborhood: str = ""):
     """
     Send new rental listings via Telegram.
 
     Args:
         new_listings: List of new rental listings to send
+        neighborhood: Name of the neighborhood for context
     """
     if not new_listings:
         return
 
     # Build message header
-    message = f"<b>🏠 {len(new_listings)} New Rental Listing{'s' if len(new_listings) > 1 else ''}</b>\n\n"
+    location = f" in {neighborhood}" if neighborhood else ""
+    message = f"<b>🏠 {len(new_listings)} New Rental Listing{'s' if len(new_listings) > 1 else ''}{location}</b>\n\n"
 
     # Add each listing
     for i, listing in enumerate(new_listings, 1):

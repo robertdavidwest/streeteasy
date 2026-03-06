@@ -45,7 +45,7 @@ def send_telegram_message(message: str) -> bool:
 def send_new_listings(new_listings: List[RentalListing], neighborhood: str = "", max_price: Optional[int] = None,
                      bedrooms_min: Optional[int] = None, bedrooms_max: Optional[int] = None):
     """
-    Send new rental listings via Telegram.
+    Send new rental listings via Telegram, splitting into multiple messages if needed.
 
     Args:
         new_listings: List of new rental listings to send
@@ -57,7 +57,10 @@ def send_new_listings(new_listings: List[RentalListing], neighborhood: str = "",
     if not new_listings:
         return
 
-    # Build message header
+    # Telegram message size limit
+    MAX_MESSAGE_LENGTH = 4000  # Leave buffer from 4096 limit
+
+    # Build header
     location = f" in {neighborhood}" if neighborhood else ""
     price_filter = f" under ${max_price:,}" if max_price else ""
 
@@ -70,18 +73,37 @@ def send_new_listings(new_listings: List[RentalListing], neighborhood: str = "",
     else:
         bedroom_filter = ""
 
-    message = f"<b>🏠 {len(new_listings)} New Rental Listing{'s' if len(new_listings) > 1 else ''}{location}{price_filter}{bedroom_filter}</b>\n\n"
+    header = f"<b>🏠 {len(new_listings)} New Rental Listing{'s' if len(new_listings) > 1 else ''}{location}{price_filter}{bedroom_filter}</b>\n\n"
 
-    # Add each listing
+    # Split listings into chunks that fit message size limit
+    messages = []
+    current_message = header
+    listing_count = 0
+
     for i, listing in enumerate(new_listings, 1):
         # Format bathrooms to show .5 but not .0
         bath_str = f"{listing['bathrooms']:.1f}".rstrip('0').rstrip('.')
 
         # Format listing info
-        message += f"{i}. <b>${listing['price']:,}/mo</b> | {listing['bedrooms']} bed {bath_str} bath\n"
-        message += f"   {listing['url']}\n\n"
+        listing_text = f"{i}. <b>${listing['price']:,}/mo</b> | {listing['bedrooms']} bed {bath_str} bath\n"
+        listing_text += f"   {listing['url']}\n\n"
 
-    send_telegram_message(message)
+        # Check if adding this listing would exceed the limit
+        if len(current_message) + len(listing_text) > MAX_MESSAGE_LENGTH:
+            # Send current message and start a new one
+            messages.append(current_message)
+            current_message = f"<b>📋 Continued (part {len(messages) + 1})</b>\n\n"
+            current_message += listing_text
+        else:
+            current_message += listing_text
+
+    # Add the last message
+    if current_message:
+        messages.append(current_message)
+
+    # Send all messages
+    for message in messages:
+        send_telegram_message(message)
 
 
 def test_telegram_connection():

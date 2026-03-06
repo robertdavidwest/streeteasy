@@ -3,7 +3,7 @@ Telegram bot functionality for sending rental listings.
 """
 import os
 import requests
-from typing import List
+from typing import List, Optional
 
 from street_easy_api import RentalListing
 
@@ -42,20 +42,35 @@ def send_telegram_message(message: str) -> bool:
     return True
 
 
-def send_new_listings(new_listings: List[RentalListing], neighborhood: str = ""):
+def send_new_listings(new_listings: List[RentalListing], neighborhood: str = "", max_price: Optional[int] = None,
+                     bedrooms_min: Optional[int] = None, bedrooms_max: Optional[int] = None):
     """
     Send new rental listings via Telegram.
 
     Args:
         new_listings: List of new rental listings to send
         neighborhood: Name of the neighborhood for context
+        max_price: Maximum price filter used in search
+        bedrooms_min: Minimum bedrooms in search
+        bedrooms_max: Maximum bedrooms in search
     """
     if not new_listings:
         return
 
     # Build message header
     location = f" in {neighborhood}" if neighborhood else ""
-    message = f"<b>🏠 {len(new_listings)} New Rental Listing{'s' if len(new_listings) > 1 else ''}{location}</b>\n\n"
+    price_filter = f" under ${max_price:,}" if max_price else ""
+
+    # Format bedroom range
+    if bedrooms_min and bedrooms_max:
+        if bedrooms_min == bedrooms_max:
+            bedroom_filter = f" ({bedrooms_min} bed)"
+        else:
+            bedroom_filter = f" ({bedrooms_min}-{bedrooms_max} bed)"
+    else:
+        bedroom_filter = ""
+
+    message = f"<b>🏠 {len(new_listings)} New Rental Listing{'s' if len(new_listings) > 1 else ''}{location}{price_filter}{bedroom_filter}</b>\n\n"
 
     # Add each listing
     for i, listing in enumerate(new_listings, 1):

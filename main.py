@@ -7,7 +7,7 @@ import telegram
 AREA_NAME = "Greenpoint"  # Neighborhood name for display
 AREA_CODE = 301  # Greenpoint area code
 PRICE_MIN = None  # No minimum price
-PRICE_MAX = 4000  # Maximum price
+PRICE_MAX = 5500  # Maximum price
 BEDROOMS_MIN = 2  # Minimum bedrooms
 BEDROOMS_MAX = 3  # Maximum bedrooms
 RESULTS_PER_PAGE = 500  # Number of results to fetch
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         print_new_listings(new_listings)
 
         # Send via Telegram
-        telegram.send_new_listings(new_listings, AREA_NAME)
+        telegram.send_new_listings(new_listings, AREA_NAME, PRICE_MAX, BEDROOMS_MIN, BEDROOMS_MAX)
 
         # Write new listings to database
         postgres.write_listings(new_listings)

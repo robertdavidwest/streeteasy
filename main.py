@@ -45,6 +45,7 @@ if __name__ == "__main__":
 
     # Get existing IDs from database
     existing_ids = postgres.get_all_ids()
+    is_first_run = len(existing_ids) == 0
     print(f"Found {len(existing_ids)} existing rentals in database")
 
     # Fetch ALL rental listings using pagination
@@ -72,8 +73,12 @@ if __name__ == "__main__":
         print("\nNew rental listings:")
         print_new_listings(new_listings)
 
-        # Send via Telegram
-        telegram.send_new_listings(new_listings, AREA_NAME, PRICE_MAX, BEDROOMS_MIN, BEDROOMS_MAX)
+        # Only send via Telegram if this isn't the first run (database wasn't empty)
+        if not is_first_run:
+            telegram.send_new_listings(new_listings, AREA_NAME, PRICE_MAX, BEDROOMS_MIN, BEDROOMS_MAX)
+            print("✅ Sent notifications via Telegram")
+        else:
+            print("📝 First run - skipping Telegram notifications")
 
         # Write new listings to database
         postgres.write_listings(new_listings)

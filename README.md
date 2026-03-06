@@ -28,7 +28,7 @@ psql -d postgres -c "CREATE DATABASE streeteasy;"
 4. Choose a username ending in `bot` (e.g., `my_streeteasy_bot`)
 5. Save the token you receive (looks like `123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
 
-#### Get Your Chat ID:
+#### Get Your Chat ID(s):
 1. Start a chat with your new bot (search for its username)
 2. Send any message to the bot
 3. Visit: `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates`
@@ -36,11 +36,18 @@ psql -d postgres -c "CREATE DATABASE streeteasy;"
 
 Alternative: Search for `@userinfobot` on Telegram, start a chat, and it will show your ID.
 
+**For multiple recipients:** Have each person message your bot, collect their chat IDs, and add them comma-separated to `TELEGRAM_CHAT_IDS`.
+
 ### 4. Configure Environment Variables
 
 ```bash
 export DATABASE_URL="postgresql://username@localhost:5432/streeteasy"
 export TELEGRAM_BOT_TOKEN="123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+
+# For multiple recipients (comma-separated):
+export TELEGRAM_CHAT_IDS="123456789,987654321"
+
+# Or for single recipient (backward compatible):
 export TELEGRAM_CHAT_ID="123456789"
 ```
 

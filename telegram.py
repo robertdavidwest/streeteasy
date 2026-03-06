@@ -10,7 +10,7 @@ from street_easy_api import RentalListing
 
 def send_telegram_message(message: str) -> bool:
     """
-    Send a message via Telegram bot.
+    Send a message via Telegram bot to multiple chat IDs.
 
     Args:
         message: The message text to send
@@ -19,18 +19,26 @@ def send_telegram_message(message: str) -> bool:
         True if message was sent successfully, False otherwise
     """
     bot_token = os.environ['TELEGRAM_BOT_TOKEN']
-    chat_id = os.environ['TELEGRAM_CHAT_ID']
+
+    # Support both TELEGRAM_CHAT_IDS (multiple) and TELEGRAM_CHAT_ID (single) for backward compatibility
+    if 'TELEGRAM_CHAT_IDS' in os.environ:
+        chat_ids = os.environ['TELEGRAM_CHAT_IDS'].split(',')
+    else:
+        chat_ids = [os.environ['TELEGRAM_CHAT_ID']]
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    payload = {
-        'chat_id': chat_id,
-        'text': message,
-        'parse_mode': 'HTML',
-        'disable_web_page_preview': True
-    }
 
-    response = requests.post(url, json=payload)
-    response.raise_for_status()
+    for chat_id in chat_ids:
+        payload = {
+            'chat_id': chat_id.strip(),
+            'text': message,
+            'parse_mode': 'HTML',
+            'disable_web_page_preview': True
+        }
+
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+
     return True
 
 

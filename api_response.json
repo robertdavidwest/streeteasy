@@ -1,0 +1,120 @@
+{
+  "data": {
+    "searchRentals": {
+      "search": {
+        "criteria": "area:301|beds:2-3|in_rect:40.711,40.746,-73.980,-73.914|price:-4000|status:open"
+      },
+      "totalCount": 4,
+      "edges": [
+        {
+          "node": {
+            "id": "4974846",
+            "areaName": "Greenpoint",
+            "bedroomCount": 2,
+            "buildingType": "RENTAL",
+            "fullBathroomCount": 2,
+            "geoPoint": {
+              "latitude": 40.724068,
+              "longitude": -73.941696
+            },
+            "halfBathroomCount": 0,
+            "leadMedia": {
+              "photo": {
+                "key": "33d6cb7beaad3228fdc50831b8dcffad"
+              }
+            },
+            "price": 3950,
+            "relloExpress": null,
+            "sourceGroupLabel": "Vector New York, LLC",
+            "status": "ACTIVE",
+            "street": "219 Kingsland Avenue",
+            "unit": "7",
+            "urlPath": "/building/219-kingsland-avenue-brooklyn/7",
+            "tier": "BASIC"
+          }
+        },
+        {
+          "node": {
+            "id": "4981686",
+            "areaName": "Greenpoint",
+            "bedroomCount": 2,
+            "buildingType": "MIXED_USE",
+            "fullBathroomCount": 1,
+            "geoPoint": {
+              "latitude": 40.729763,
+              "longitude": -73.95733
+            },
+            "halfBathroomCount": 0,
+            "leadMedia": {
+              "photo": {
+                "key": "5b8cdbe6c1c8cf61aa23f5320f066703"
+              }
+            },
+            "price": 3895,
+            "relloExpress": null,
+            "sourceGroupLabel": "Sterling Holdings",
+            "status": "ACTIVE",
+            "street": "142 Franklin Street",
+            "unit": "2BB",
+            "urlPath": "/building/142-franklin-street-brooklyn/2bb",
+            "tier": "BASIC"
+          }
+        },
+        {
+          "node": {
+            "id": "4975227",
+            "areaName": "Greenpoint",
+            "bedroomCount": 2,
+            "buildingType": "RENTAL",
+            "fullBathroomCount": 1,
+            "geoPoint": {
+              "latitude": 40.720688,
+              "longitude": -73.944115
+            },
+            "halfBathroomCount": 0,
+            "leadMedia": {
+              "photo": {
+                "key": "296f7fee2416660ec945b1f6d3217f4a"
+              }
+            },
+            "price": 3500,
+            "relloExpress": null,
+            "sourceGroupLabel": "Rennit Inc.",
+            "status": "ACTIVE",
+            "street": "511 Meeker Avenue",
+            "unit": "2K",
+            "urlPath": "/building/511-meeker-avenue-brooklyn/2k",
+            "tier": "BASIC"
+          }
+        },
+        {
+          "node": {
+            "id": "4964764",
+            "areaName": "Greenpoint",
+            "bedroomCount": 2,
+            "buildingType": "RENTAL",
+            "fullBathroomCount": 1,
+            "geoPoint": {
+              "latitude": 40.730274,
+              "longitude": -73.95596
+            },
+            "halfBathroomCount": 0,
+            "leadMedia": {
+              "photo": {
+                "key": "11e2049c621c5ef990259395e3af0bb9"
+              }
+            },
+            "price": 3900,
+            "relloExpress": null,
+            "sourceGroupLabel": "Outpost Brokerage LLC",
+            "status": "ACTIVE",
+            "street": "107 Greenpoint Avenue",
+            "unit": "A2",
+            "urlPath": "/building/107-greenpoint-avenue-brooklyn/a2",
+            "tier": "BASIC"
+          }
+        }
+      ]
+    }
+  }
+}

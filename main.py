@@ -1,6 +1,7 @@
 from street_easy_api import fetch_all_rentals, API_URL, RentalListing
 from typing import List
 import postgres
+import telegram
 
 # Search criteria configuration
 AREA_CODE = 301  # Greenpoint area code
@@ -65,10 +66,13 @@ if __name__ == "__main__":
     print(f"NEW LISTINGS: {len(new_listings)}")
     print("=" * 80)
 
-    # Display new listing URLs
+    # Send new listings via Telegram and save to database
     if new_listings:
         print("\nNew rental listings:")
         print_new_listings(new_listings)
+
+        # Send via Telegram
+        telegram.send_new_listings(new_listings)
 
         # Write new listings to database
         postgres.write_listings(new_listings)

@@ -13,16 +13,16 @@ __all__ = ['API_URL', 'RentalListing', 'fetch_all_rentals', 'fetch_rentals',
 
 class RentalListing(TypedDict, total=False):
     """Data structure for a rental listing."""
-    # Required fields for now
+    # Required fields
     id: str
     url: str
+    bedrooms: int
+    bathrooms: float  # Includes half bathrooms as 0.5
+    price: int
 
     # Available fields from API (commented out for future use)
     # street: str
     # unit: str
-    # price: int
-    # bedroom_count: int
-    # full_bathroom_count: int
     # half_bathroom_count: int
     # area_name: str
     # building_type: str
@@ -49,18 +49,21 @@ def extract_listing_data(node: Dict[str, Any]) -> RentalListing:
     """
     listing: RentalListing = {}
 
-    # Extract ID (required field - will raise KeyError if missing)
+    # Extract required fields (will raise KeyError if missing)
     listing['id'] = node['id']
-
-    # Build the full URL (required field - will raise KeyError if missing)
     listing['url'] = f"https://streeteasy.com{node['urlPath']}"
+    listing['bedrooms'] = node['bedroomCount']
+
+    # Combine full and half bathrooms (half bathrooms count as 0.5)
+    full_baths = node['fullBathroomCount']
+    half_baths = node['halfBathroomCount']
+    listing['bathrooms'] = full_baths + (half_baths * 0.5)
+
+    listing['price'] = node['price']
 
     # Uncomment to extract additional fields as needed:
     # listing['street'] = node.get('street')
     # listing['unit'] = node.get('unit')
-    # listing['price'] = node.get('price')
-    # listing['bedroom_count'] = node.get('bedroomCount')
-    # listing['full_bathroom_count'] = node.get('fullBathroomCount')
     # listing['half_bathroom_count'] = node.get('halfBathroomCount')
     # listing['area_name'] = node.get('areaName')
     # listing['building_type'] = node.get('buildingType')

@@ -4,7 +4,13 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 import sys
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent / "src"))
@@ -43,11 +49,8 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # Use the engine from core.database which has correct psycopg driver
+    from core.database import engine as connectable
 
     with connectable.connect() as connection:
         context.configure(

@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
 
-from models.event import EventType
+from src.models.event import EventType
 
 
 class EventCreate(BaseModel):

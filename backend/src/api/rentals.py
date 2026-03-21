@@ -3,11 +3,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
-from core.database import get_db
-from models.rental import Rental
-from models.user import User
-from schemas.rental import RentalResponse
-from services.auth import get_current_user
+from src.core.database import get_db
+from src.models.rental import Rental
+from src.models.user import User
+from src.schemas.rental import RentalResponse
+from src.services.auth import get_current_user
 
 router = APIRouter(prefix="/rentals", tags=["rentals"])
 

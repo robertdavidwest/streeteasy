@@ -14,40 +14,84 @@ This repository contains three components:
 
 See [PROJECT_SPEC.md](./PROJECT_SPEC.md) for complete technical specification.
 
-## Quick Start (Local Development)
+## Quick Start (Local Development - No Docker)
 
 ### Prerequisites
-- Docker & Docker Compose
-- PostgreSQL database (Railway.com or local)
-- Node.js 18+ (for frontend development)
-- Python 3.11+ (for backend development)
+- Python 3.11+
+- Node.js 18+
+- PostgreSQL (local or Railway.com)
+- `uv` (Python package manager): `pip install uv`
 
-### Running Locally
+### Initial Setup
 
-```bash
-# Start all services (frontend, backend, database)
-docker-compose up
-
-# Frontend will be available at: http://localhost:5173
-# Backend API at: http://localhost:8000
-# API docs at: http://localhost:8000/docs
-```
-
-### Environment Variables
-
-Create a `.env` file in the root directory:
+**1. Set up local PostgreSQL database**
 
 ```bash
-# Database (Railway.com)
-DATABASE_URL=postgresql://user:password@host:port/dbname
+# Create database (if doesn't exist)
+createdb streeteasy
 
-# Backend
-BACKEND_PORT=8000
-CORS_ORIGINS=http://localhost:5173
+# Import data from Railway (optional)
+# First, install postgres 17 client tools for pg_dump compatibility
+brew install postgresql@17
 
-# Frontend
-VITE_API_URL=http://localhost:8000
+# Dump from Railway
+export RAILWAY_DATABASE_URL="your_railway_url_here"
+/opt/homebrew/opt/postgresql@17/bin/pg_dump $RAILWAY_DATABASE_URL > railway_dump.sql
+
+# Import to local
+psql streeteasy < railway_dump.sql
 ```
+
+**2. Backend Setup**
+
+```bash
+cd backend
+
+# Install dependencies
+uv pip install -e .
+
+# Create .env file (copy from .env.example)
+cp .env.example .env
+
+# Edit .env with your local database URL:
+# DATABASE_URL=postgresql://YOUR_USERNAME@localhost:5432/streeteasy
+
+# Create initial migration for new tables (users, favorites, events)
+alembic revision --autogenerate -m "Add users, favorites, events tables"
+
+# Run migrations
+alembic upgrade head
+
+# Start backend server
+uvicorn src.main:app --reload --port 8000
+```
+
+Backend will be available at:
+- API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+**3. Frontend Setup** (in a new terminal)
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Create .env file
+echo "VITE_API_URL=http://localhost:8000" > .env
+
+# Start dev server
+npm run dev
+```
+
+Frontend will be available at: http://localhost:5173
+
+### Using the App
+
+1. Go to http://localhost:5173
+2. First time: Sign up (only first user can register)
+3. Login and start browsing rentals from Greenpoint, Brooklyn
 
 ## Individual Component Setup
 

@@ -2,12 +2,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from core.database import get_db
-from models.user import User
-from models.favorite import Favorite
-from models.event import Event
-from schemas.event import EventCreate, EventUpdate, EventResponse
-from services.auth import get_current_user
+from src.core.database import get_db
+from src.models.user import User
+from src.models.favorite import Favorite
+from src.models.event import Event
+from src.schemas.event import EventCreate, EventUpdate, EventResponse
+from src.services.auth import get_current_user
 
 router = APIRouter(prefix="/events", tags=["events"])
 

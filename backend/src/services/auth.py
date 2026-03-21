@@ -9,10 +9,10 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from core.config import settings
-from core.database import get_db
-from models.user import User
-from schemas.user import TokenData
+from src.core.config import settings
+from src.core.database import get_db
+from src.models.user import User
+from src.schemas.user import TokenData
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()

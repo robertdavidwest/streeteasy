@@ -2,6 +2,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Enum
+from sqlalchemy.orm import relationship
 import enum
 
 from .base import Base

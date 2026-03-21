@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { rentalsApi, Rental, ApiError } from '../services/api'
+import { rentalsApi, favoritesApi, Rental, Favorite, ApiError } from '../services/api'
 
 export default function RentalsPage() {
   const { token, logout } = useAuth()
   const [rentals, setRentals] = useState<Rental[]>([])
+  const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [favoritingId, setFavoritingId] = useState<string | null>(null)
 
   // Filters
   const [minPrice, setMinPrice] = useState('')
@@ -46,8 +48,55 @@ export default function RentalsPage() {
     }
   }
 
+  const loadFavorites = async () => {
+    if (!token) return
+    try {
+      const data = await favoritesApi.list(token)
+      setFavorites(data)
+    } catch (err) {
+      console.error('Failed to load favorites:', err)
+    }
+  }
+
+  const isFavorited = (rentalId: string) => {
+    return favorites.some((fav) => fav.rental_id === rentalId)
+  }
+
+  const getFavoriteId = (rentalId: string) => {
+    return favorites.find((fav) => fav.rental_id === rentalId)?.id
+  }
+
+  const handleToggleFavorite = async (rental: Rental) => {
+    if (!token) return
+
+    const favorited = isFavorited(rental.id)
+    setFavoritingId(rental.id)
+
+    try {
+      if (favorited) {
+        const favoriteId = getFavoriteId(rental.id)
+        if (favoriteId) {
+          await favoritesApi.delete(token, favoriteId)
+          setFavorites((prev) => prev.filter((f) => f.id !== favoriteId))
+        }
+      } else {
+        const newFavorite = await favoritesApi.create(token, rental.id)
+        setFavorites((prev) => [...prev, newFavorite])
+      }
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message)
+      } else {
+        setError('Failed to update favorite')
+      }
+    } finally {
+      setFavoritingId(null)
+    }
+  }
+
   useEffect(() => {
     loadRentals()
+    loadFavorites()
   }, [page])
 
   const handleApplyFilters = () => {
@@ -163,8 +212,25 @@ export default function RentalsPage() {
                     </a>
                   </div>
                   <div>
-                    <button style={{ padding: '10px 20px', backgroundColor: '#ffc107', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                      ★ Favorite
+                    <button
+                      onClick={() => handleToggleFavorite(rental)}
+                      disabled={favoritingId === rental.id}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: isFavorited(rental.id) ? '#28a745' : '#ffc107',
+                        color: isFavorited(rental.id) ? 'white' : '#000',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: favoritingId === rental.id ? 'not-allowed' : 'pointer',
+                        fontWeight: 'bold',
+                        opacity: favoritingId === rental.id ? 0.6 : 1,
+                      }}
+                    >
+                      {favoritingId === rental.id
+                        ? '...'
+                        : isFavorited(rental.id)
+                        ? '✓ Favorited'
+                        : '★ Favorite'}
                     </button>
                   </div>
                 </div>

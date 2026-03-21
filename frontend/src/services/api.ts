@@ -38,6 +38,26 @@ interface RentalsParams {
   max_bedrooms?: number
 }
 
+interface Favorite {
+  id: number
+  user_id: string
+  rental_id: string
+  created_at: string
+  updated_at: string
+  rental: Rental | null
+  events: Event[]
+}
+
+interface Event {
+  id: number
+  favorite_id: number
+  event_type: 'reached_out' | 'viewed' | 'applied' | 'custom'
+  event_date: string
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 class ApiError extends Error {
   constructor(
     message: string,
@@ -119,5 +139,54 @@ export const rentalsApi = {
   },
 }
 
+export const favoritesApi = {
+  async list(token: string): Promise<Favorite[]> {
+    const response = await fetch(`${API_URL}/api/favorites`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return handleResponse<Favorite[]>(response)
+  },
+
+  async create(token: string, rental_id: string): Promise<Favorite> {
+    const response = await fetch(`${API_URL}/api/favorites`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ rental_id }),
+    })
+    return handleResponse<Favorite>(response)
+  },
+
+  async delete(token: string, favoriteId: number): Promise<void> {
+    const response = await fetch(`${API_URL}/api/favorites/${favoriteId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to delete favorite',
+        response.status,
+        error
+      )
+    }
+  },
+
+  async getById(token: string, favoriteId: number): Promise<Favorite> {
+    const response = await fetch(`${API_URL}/api/favorites/${favoriteId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return handleResponse<Favorite>(response)
+  },
+}
+
 export { ApiError }
-export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams }
+export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams, Favorite, Event }

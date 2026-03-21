@@ -115,16 +115,30 @@ Each favorited listing maintains a timestamped event history:
 ## Data Model
 
 ### Existing Tables (from scraper)
-- `listings` - StreetEasy listing data
-  - Will need to add `image_urls` field in future enhancement
+- `rentals` - StreetEasy listing data (Greenpoint, Brooklyn only for MVP)
+  - `id` (TEXT, PK) - StreetEasy listing ID
+  - `url` (TEXT) - StreetEasy listing URL
+  - `bedrooms` (INTEGER)
+  - `bathrooms` (REAL)
+  - `price` (INTEGER) - Monthly rent
+  - Future: Add `image_urls`, `address`, `description`, `created_at` fields
 
 ### New Tables (to be created)
 
-**favorites**
-- `id` (PK)
-- `listing_id` (FK to listings)
+**users**
+- `id` (PK, UUID)
+- `email` (unique, indexed)
+- `password_hash` (bcrypt)
 - `created_at`
 - `updated_at`
+
+**favorites**
+- `id` (PK)
+- `user_id` (FK to users)
+- `rental_id` (FK to rentals.id, TEXT)
+- `created_at`
+- `updated_at`
+- Unique constraint on (user_id, rental_id)
 
 **events**
 - `id` (PK)
@@ -135,22 +149,22 @@ Each favorited listing maintains a timestamped event history:
 - `created_at`
 - `updated_at`
 
-**notes** (alternative: could be merged with events)
-- `id` (PK)
-- `favorite_id` (FK to favorites)
-- `content` (text)
-- `created_at`
-- `updated_at`
-
 ## API Design
 
 ### Endpoints (FastAPI)
 
-**Listings**
+**Authentication** (public endpoints)
+- `POST /api/auth/signup` - Register first user (disabled after first signup)
+- `POST /api/auth/login` - Login and get JWT token
+- `POST /api/auth/refresh` - Refresh JWT token
+- `POST /api/auth/logout` - Logout (invalidate token)
+- `GET /api/auth/me` - Get current user info
+
+**Listings** (protected)
 - `GET /api/listings` - List all listings (paginated, filterable)
 - `GET /api/listings/{id}` - Get single listing detail
 
-**Favorites**
+**Favorites** (protected)
 - `GET /api/favorites` - List all favorites
 - `POST /api/favorites` - Add listing to favorites
 - `DELETE /api/favorites/{id}` - Remove from favorites
@@ -169,13 +183,39 @@ Each favorited listing maintains a timestamped event history:
 
 ## Authentication & Authorization
 
-**Phase 1 (MVP):** Single user, no authentication
-- App is for personal use only
-- No login required
+**Phase 1 (MVP):** First signup wins
 
-**Phase 2 (Future):** Optional multi-user support
-- Add authentication (JWT tokens)
-- User-scoped favorites and events
+**Registration:**
+- First user to register gets access, then signup is disabled
+- Email + password only (no username)
+- Strong password requirements:
+  - Minimum 12 characters
+  - Must include: uppercase, lowercase, number, special character
+  - Validated against common password patterns
+- Passwords hashed with bcrypt (work factor 12)
+- Email uniqueness enforced
+
+**Login/Session:**
+- JWT tokens for API authentication
+- 7-day token expiry with refresh tokens
+- Tokens stored in httpOnly cookies (secure)
+
+**Security:**
+- All API endpoints (except /login, /signup) require authentication
+- User-scoped data (favorites, events, notes)
+- `/signup` endpoint checks if users exist - returns 403 if any user exists
+
+**MVP Limitations:**
+- No password reset flow (manual DB reset if needed)
+- No email verification
+- No 2FA
+- Single user only
+
+**Phase 2 (Future):**
+- Password reset flow with email
+- Email verification
+- Multi-factor authentication
+- Multi-user support with invite system
 
 ## Development Workflow
 

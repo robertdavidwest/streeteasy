@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { favoritesApi, eventsApi, Favorite, Event, EventCreate, EventUpdate, ApiError } from '../services/api'
 import EventForm from '../components/EventForm'
+import { formatListingTitle } from '../utils/formatters'
 
 export default function FavoritesPage() {
   const { token, logout } = useAuth()
@@ -216,14 +217,17 @@ export default function FavoritesPage() {
                   <div style={{ flex: 1 }}>
                     {favorite.rental ? (
                       <>
-                        <h3 style={{ margin: '0 0 10px 0' }}>
+                        <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
+                          {formatListingTitle(favorite.rental.url)}
+                        </h3>
+                        <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '10px' }}>
                           {favorite.rental.bedrooms === 0
                             ? 'Studio'
                             : `${favorite.rental.bedrooms} Bedroom${favorite.rental.bedrooms > 1 ? 's' : ''}`}
                           {' • '}
                           {favorite.rental.bathrooms} Bath
                           {favorite.rental.bathrooms !== 1 ? 's' : ''}
-                        </h3>
+                        </div>
                         <div
                           style={{
                             fontSize: '24px',

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { rentalsApi, favoritesApi, Rental, Favorite, ApiError } from '../services/api'
+import { formatListingTitle } from '../utils/formatters'
 
 export default function RentalsPage() {
   const { token, logout } = useAuth()
@@ -199,11 +200,14 @@ export default function RentalsPage() {
               <div key={rental.id} style={{ padding: '20px', backgroundColor: 'white', border: '1px solid #dee2e6', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: '0 0 10px 0' }}>
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
+                      {formatListingTitle(rental.url)}
+                    </h3>
+                    <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '10px' }}>
                       {rental.bedrooms === 0 ? 'Studio' : `${rental.bedrooms} Bedroom${rental.bedrooms > 1 ? 's' : ''}`}
                       {' • '}
                       {rental.bathrooms} Bath{rental.bathrooms !== 1 ? 's' : ''}
-                    </h3>
+                    </div>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#28a745', marginBottom: '10px' }}>
                       ${rental.price.toLocaleString()}/mo
                     </div>

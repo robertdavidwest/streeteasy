@@ -1,88 +1,153 @@
-# StreetEasy Rental Tracker
+# StreetEasyAndMe
 
-Tracks new rental listings in NYC via StreetEasy's API and sends notifications via Telegram.
+**Domain:** [streeteasyandme.com](https://streeteasyandme.com)
 
-## Setup
+A web application for tracking and managing your NYC apartment rental search. Browse scraped StreetEasy listings, favorite apartments, and maintain a timestamped history of your rental search activities.
 
-### 1. Install Dependencies
+## Project Overview
+
+This repository contains three components:
+
+1. **Scraper** (`scraper/`) - Automated StreetEasy listing scraper with Telegram notifications
+2. **Backend** (`backend/`) - FastAPI REST API for managing favorites and events
+3. **Frontend** (`frontend/`) - React web application for browsing and tracking listings
+
+See [PROJECT_SPEC.md](./PROJECT_SPEC.md) for complete technical specification.
+
+## Quick Start (Local Development)
+
+### Prerequisites
+- Docker & Docker Compose
+- PostgreSQL database (Railway.com or local)
+- Node.js 18+ (for frontend development)
+- Python 3.11+ (for backend development)
+
+### Running Locally
 
 ```bash
-pip install requests psycopg2-binary
+# Start all services (frontend, backend, database)
+docker-compose up
+
+# Frontend will be available at: http://localhost:5173
+# Backend API at: http://localhost:8000
+# API docs at: http://localhost:8000/docs
 ```
 
-### 2. Set Up PostgreSQL
+### Environment Variables
+
+Create a `.env` file in the root directory:
 
 ```bash
-# Create database
-psql -d postgres -c "CREATE DATABASE streeteasy;"
+# Database (Railway.com)
+DATABASE_URL=postgresql://user:password@host:port/dbname
 
-# The table will be created automatically on first run
+# Backend
+BACKEND_PORT=8000
+CORS_ORIGINS=http://localhost:5173
+
+# Frontend
+VITE_API_URL=http://localhost:8000
 ```
 
-### 3. Set Up Telegram Bot
+## Individual Component Setup
 
-#### Create a Bot:
-1. Open Telegram and search for `@BotFather`
-2. Send `/newbot`
-3. Choose a name for your bot (e.g., "StreetEasy Tracker")
-4. Choose a username ending in `bot` (e.g., `my_streeteasy_bot`)
-5. Save the token you receive (looks like `123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
+### Scraper
 
-#### Get Your Chat ID(s):
-1. Start a chat with your new bot (search for its username)
-2. Send any message to the bot
-3. Visit: `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates`
-4. Find the `"chat":{"id":` number (e.g., `123456789`)
+The scraper runs independently and populates the PostgreSQL database with StreetEasy listings.
 
-Alternative: Search for `@userinfobot` on Telegram, start a chat, and it will show your ID.
+See [scraper/README.md](./scraper/README.md) for setup and usage.
 
-**For multiple recipients:** Have each person message your bot, collect their chat IDs, and add them comma-separated to `TELEGRAM_CHAT_IDS`.
-
-### 4. Configure Environment Variables
-
+**Quick Start:**
 ```bash
+cd scraper
+pip install -r requirements.txt
+
+# Set environment variables
 export DATABASE_URL="postgresql://username@localhost:5432/streeteasy"
-export TELEGRAM_BOT_TOKEN="123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+export TELEGRAM_BOT_TOKEN="your_token"
+export TELEGRAM_CHAT_IDS="your_chat_ids"
 
-# For multiple recipients (comma-separated):
-export TELEGRAM_CHAT_IDS="123456789,987654321"
-
-# Or for single recipient (backward compatible):
-export TELEGRAM_CHAT_ID="123456789"
-```
-
-### 5. Customize Search Criteria
-
-Edit `main.py` to adjust your search preferences:
-
-```python
-AREA_NAME = "Greenpoint"  # Neighborhood name for display
-AREA_CODE = 301           # Neighborhood code
-PRICE_MAX = 4000          # Maximum rent
-BEDROOMS_MIN = 2          # Minimum bedrooms
-BEDROOMS_MAX = 3          # Maximum bedrooms
-```
-
-## Usage
-
-```bash
 python main.py
 ```
 
-The script will:
-1. Fetch all listings matching your criteria
-2. Compare against previously seen listings in the database
-3. Send new listings to Telegram
-4. Store new listings in PostgreSQL
+### Backend (FastAPI)
 
-## Files
+See [backend/README.md](./backend/README.md) for API documentation.
 
-- `main.py` - Main script with search configuration
-- `street_easy_api.py` - API functions for fetching listings
-- `street_easy_config.py` - API endpoint and headers
-- `postgres.py` - Database operations
-- `telegram.py` - Telegram notifications
+**Development:**
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn src.main:app --reload --port 8000
+```
 
-## Scheduling
+### Frontend (React + Vite)
 
-Schedule where you like. I deploy on render.com with a cron job
+See [frontend/README.md](./frontend/README.md) for component documentation.
+
+**Development:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Deployment
+
+### Render.com Deployment
+
+**Backend Service:**
+- Root Directory: `backend/`
+- Build Command: Docker
+- Environment Variables: `DATABASE_URL`
+
+**Frontend Service:**
+- Root Directory: `frontend/`
+- Build Command: Docker
+- Environment Variables: `VITE_API_URL`
+
+**Database:**
+- Hosted on Railway.com (existing setup)
+
+See [PROJECT_SPEC.md](./PROJECT_SPEC.md) for detailed deployment instructions.
+
+## Features
+
+### Current (MVP)
+- Browse all scraped StreetEasy listings
+- Mark listings as favorites
+- Add timestamped events (reach outs, viewings, applications)
+- Add notes to events
+- Responsive web design
+
+### Planned
+- Listing images (requires scraper update)
+- Advanced filtering and search
+- Email/SMS reminders
+- Data export
+- Analytics dashboard
+
+## Project Structure
+
+```
+streeteasilyandme/
+├── scraper/           # StreetEasy scraper (independent)
+├── backend/           # FastAPI backend
+│   ├── src/
+│   ├── alembic/       # Database migrations
+│   └── Dockerfile
+├── frontend/          # React frontend
+│   ├── src/
+│   └── Dockerfile
+├── docker-compose.yml # Local development
+├── PROJECT_SPEC.md    # Technical specification
+└── README.md          # This file
+```
+
+## Contributing
+
+This is a personal project, but if you have suggestions or find bugs, feel free to open an issue.
+
+## License
+
+MIT

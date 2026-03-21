@@ -25,7 +25,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(rentals.router, prefix="/api")
 app.include_router(favorites.router, prefix="/api")
-app.include_router(events.router, prefix="/api/favorites")
+app.include_router(events.router, prefix="/api")
 
 
 @app.get("/")

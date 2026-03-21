@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { favoritesApi, Favorite, ApiError } from '../services/api'
+import { favoritesApi, eventsApi, Favorite, Event, EventCreate, EventUpdate, ApiError } from '../services/api'
+import EventForm from '../components/EventForm'
 
 export default function FavoritesPage() {
   const { token, logout } = useAuth()
@@ -9,6 +10,9 @@ export default function FavoritesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [removingId, setRemovingId] = useState<number | null>(null)
+  const [addingEventToId, setAddingEventToId] = useState<number | null>(null)
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null)
+  const [deletingEventId, setDeletingEventId] = useState<number | null>(null)
 
   const loadFavorites = async () => {
     if (!token) return
@@ -46,6 +50,59 @@ export default function FavoritesPage() {
       }
     } finally {
       setRemovingId(null)
+    }
+  }
+
+  const handleAddEvent = async (favoriteId: number, data: EventCreate) => {
+    if (!token) return
+
+    const newEvent = await eventsApi.create(token, favoriteId, data)
+    setFavorites((prev) =>
+      prev.map((fav) =>
+        fav.id === favoriteId
+          ? { ...fav, events: [...fav.events, newEvent] }
+          : fav
+      )
+    )
+    setAddingEventToId(null)
+  }
+
+  const handleUpdateEvent = async (eventId: number, data: EventUpdate) => {
+    if (!token) return
+
+    const updatedEvent = await eventsApi.update(token, eventId, data as EventCreate)
+    setFavorites((prev) =>
+      prev.map((fav) => ({
+        ...fav,
+        events: fav.events.map((evt) =>
+          evt.id === eventId ? updatedEvent : evt
+        ),
+      }))
+    )
+    setEditingEvent(null)
+  }
+
+  const handleDeleteEvent = async (eventId: number) => {
+    if (!token) return
+
+    setDeletingEventId(eventId)
+
+    try {
+      await eventsApi.delete(token, eventId)
+      setFavorites((prev) =>
+        prev.map((fav) => ({
+          ...fav,
+          events: fav.events.filter((evt) => evt.id !== eventId),
+        }))
+      )
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message)
+      } else {
+        setError('Failed to delete event')
+      }
+    } finally {
+      setDeletingEventId(null)
     }
   }
 
@@ -192,39 +249,119 @@ export default function FavoritesPage() {
                       </div>
                     )}
 
-                    {favorite.events.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: '15px',
-                          paddingTop: '15px',
-                          borderTop: '1px solid #dee2e6',
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                            marginBottom: '10px',
-                          }}
-                        >
+                    <div
+                      style={{
+                        marginTop: '15px',
+                        paddingTop: '15px',
+                        borderTop: '1px solid #dee2e6',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
                           Events ({favorite.events.length})
                         </div>
-                        {favorite.events.map((event) => (
-                          <div
-                            key={event.id}
+                        {addingEventToId !== favorite.id && (
+                          <button
+                            onClick={() => setAddingEventToId(favorite.id)}
                             style={{
-                              fontSize: '14px',
-                              color: '#6c757d',
-                              marginBottom: '5px',
+                              padding: '4px 12px',
+                              fontSize: '12px',
+                              backgroundColor: '#007bff',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
                             }}
                           >
-                            • {event.event_type.replace('_', ' ')} -{' '}
-                            {new Date(event.event_date).toLocaleDateString()}
-                            {event.notes && `: ${event.notes}`}
-                          </div>
-                        ))}
+                            + Add Event
+                          </button>
+                        )}
                       </div>
-                    )}
+
+                      {addingEventToId === favorite.id && (
+                        <div style={{ marginBottom: '15px' }}>
+                          <EventForm
+                            onSubmit={(data) => handleAddEvent(favorite.id, data)}
+                            onCancel={() => setAddingEventToId(null)}
+                            submitLabel="Add Event"
+                          />
+                        </div>
+                      )}
+
+                      {favorite.events.length > 0 && (
+                        <div style={{ display: 'grid', gap: '10px' }}>
+                          {favorite.events.map((event) => (
+                            <div key={event.id}>
+                              {editingEvent?.id === event.id ? (
+                                <EventForm
+                                  onSubmit={(data) => handleUpdateEvent(event.id, data)}
+                                  onCancel={() => setEditingEvent(null)}
+                                  initialData={event}
+                                  submitLabel="Update Event"
+                                />
+                              ) : (
+                                <div
+                                  style={{
+                                    padding: '10px',
+                                    backgroundColor: '#f8f9fa',
+                                    borderRadius: '4px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'start',
+                                  }}
+                                >
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '14px', fontWeight: 'bold', textTransform: 'capitalize' }}>
+                                      {event.event_type.replace('_', ' ')}
+                                    </div>
+                                    <div style={{ fontSize: '13px', color: '#6c757d', marginTop: '2px' }}>
+                                      {new Date(event.event_date).toLocaleDateString()}
+                                    </div>
+                                    {event.notes && (
+                                      <div style={{ fontSize: '13px', color: '#6c757d', marginTop: '5px' }}>
+                                        {event.notes}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div style={{ display: 'flex', gap: '5px', marginLeft: '10px' }}>
+                                    <button
+                                      onClick={() => setEditingEvent(event)}
+                                      style={{
+                                        padding: '4px 8px',
+                                        fontSize: '12px',
+                                        backgroundColor: '#ffc107',
+                                        color: '#000',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                      }}
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteEvent(event.id)}
+                                      disabled={deletingEventId === event.id}
+                                      style={{
+                                        padding: '4px 8px',
+                                        fontSize: '12px',
+                                        backgroundColor: '#dc3545',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: deletingEventId === event.id ? 'not-allowed' : 'pointer',
+                                        opacity: deletingEventId === event.id ? 0.6 : 1,
+                                      }}
+                                    >
+                                      {deletingEventId === event.id ? '...' : 'Delete'}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

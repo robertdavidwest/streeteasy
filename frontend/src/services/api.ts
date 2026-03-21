@@ -188,5 +188,60 @@ export const favoritesApi = {
   },
 }
 
+interface EventCreate {
+  event_type: 'reached_out' | 'viewed' | 'applied' | 'custom'
+  event_date: string
+  notes?: string
+}
+
+interface EventUpdate {
+  event_type?: 'reached_out' | 'viewed' | 'applied' | 'custom'
+  event_date?: string
+  notes?: string
+}
+
+export const eventsApi = {
+  async create(token: string, favoriteId: number, data: EventCreate): Promise<Event> {
+    const response = await fetch(`${API_URL}/api/favorites/${favoriteId}/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Event>(response)
+  },
+
+  async update(token: string, eventId: number, data: EventUpdate): Promise<Event> {
+    const response = await fetch(`${API_URL}/api/events/${eventId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Event>(response)
+  },
+
+  async delete(token: string, eventId: number): Promise<void> {
+    const response = await fetch(`${API_URL}/api/events/${eventId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to delete event',
+        response.status,
+        error
+      )
+    }
+  },
+}
+
 export { ApiError }
-export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams, Favorite, Event }
+export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams, Favorite, Event, EventCreate, EventUpdate }

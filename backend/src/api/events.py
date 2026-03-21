@@ -9,10 +9,10 @@ from src.models.event import Event
 from src.schemas.event import EventCreate, EventUpdate, EventResponse
 from src.services.auth import get_current_user
 
-router = APIRouter(prefix="/events", tags=["events"])
+router = APIRouter(tags=["events"])
 
 
-@router.post("/{favorite_id}/events", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/favorites/{favorite_id}/events", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
 def create_event(
     favorite_id: int,
     event_data: EventCreate,
@@ -43,7 +43,7 @@ def create_event(
     return event
 
 
-@router.put("/{event_id}", response_model=EventResponse)
+@router.put("/events/{event_id}", response_model=EventResponse)
 def update_event(
     event_id: int,
     event_data: EventUpdate,
@@ -84,7 +84,7 @@ def update_event(
     return event
 
 
-@router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_event(
     event_id: int,
     db: Session = Depends(get_db),

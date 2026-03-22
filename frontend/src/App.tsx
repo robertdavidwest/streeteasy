@@ -18,7 +18,7 @@ function App() {
             path="/"
             element={
               <PrivateRoute>
-                <DashboardPage />
+                <FavoritesPage />
               </PrivateRoute>
             }
           />

@@ -117,18 +117,61 @@ export default function RentalsPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <div>
-          <Link to="/" style={{ color: '#007bff', textDecoration: 'none', marginRight: '20px' }}>
-            ← Dashboard
-          </Link>
-          <h1 style={{ display: 'inline' }}>Browse Rentals</h1>
+    <div>
+      {/* Navigation Bar */}
+      <div
+        style={{
+          backgroundColor: '#007bff',
+          padding: '15px 30px',
+          color: 'white',
+          marginBottom: '30px',
+        }}
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+            <h1 style={{ margin: 0, fontSize: '24px' }}>StreetEasyAndMe</h1>
+            <nav style={{ display: 'flex', gap: '20px' }}>
+              <Link
+                to="/"
+                style={{
+                  color: 'white',
+                  textDecoration: 'none',
+                  opacity: 0.8,
+                }}
+              >
+                My Listings
+              </Link>
+              <Link
+                to="/rentals"
+                style={{
+                  color: 'white',
+                  textDecoration: 'none',
+                  fontWeight: 'bold',
+                  borderBottom: '2px solid white',
+                  paddingBottom: '4px',
+                }}
+              >
+                Browse Rentals
+              </Link>
+            </nav>
+          </div>
+          <button
+            onClick={logout}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: '1px solid white',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Logout
+          </button>
         </div>
-        <button onClick={logout} style={{ padding: '8px 16px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          Logout
-        </button>
       </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
 
       {/* Filters */}
       <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '20px' }}>
@@ -286,6 +329,7 @@ export default function RentalsPage() {
           </div>
         </>
       )}
+      </div>
     </div>
   )
 }

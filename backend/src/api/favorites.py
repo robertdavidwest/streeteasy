@@ -169,11 +169,62 @@ def delete_favorite(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> None:
-    """Remove a favorite."""
+    """Soft delete a favorite."""
     favorite = (
         db.query(Favorite)
         .filter(
             Favorite.id == favorite_id, Favorite.user_id == current_user.id
+        )
+        .first()
+    )
+    if not favorite:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Favorite not found",
+        )
+
+    favorite.is_deleted = True
+    db.commit()
+
+
+@router.patch("/{favorite_id}/restore", status_code=status.HTTP_204_NO_CONTENT)
+def restore_favorite(
+    favorite_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    """Restore a soft-deleted favorite."""
+    favorite = (
+        db.query(Favorite)
+        .filter(
+            Favorite.id == favorite_id,
+            Favorite.user_id == current_user.id,
+            Favorite.is_deleted == True,
+        )
+        .first()
+    )
+    if not favorite:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Deleted favorite not found",
+        )
+
+    favorite.is_deleted = False
+    db.commit()
+
+
+@router.delete("/{favorite_id}/permanent", status_code=status.HTTP_204_NO_CONTENT)
+def permanently_delete_favorite(
+    favorite_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
+    """Permanently delete a favorite."""
+    favorite = (
+        db.query(Favorite)
+        .filter(
+            Favorite.id == favorite_id,
+            Favorite.user_id == current_user.id,
         )
         .first()
     )

@@ -39,6 +39,7 @@ class FavoriteResponse(BaseModel):
     rental_id: str
     current_state: str
     showing_datetime: Optional[datetime] = None
+    is_deleted: bool
     state_updated_at: datetime
     created_at: datetime
     updated_at: datetime

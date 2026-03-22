@@ -8,6 +8,7 @@ from sqlalchemy import (
     Integer,
     ForeignKey,
     UniqueConstraint,
+    Boolean,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -31,6 +32,7 @@ class Favorite(Base):
         String, nullable=False, default="interested"
     )  # interested, reached_out, showing_scheduled, viewed, applied, rejected
     showing_datetime = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, nullable=False, default=False)
     state_updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(

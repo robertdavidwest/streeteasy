@@ -11,6 +11,9 @@ export default function FavoritesPage() {
   const [error, setError] = useState('')
   const [removingId, setRemovingId] = useState<number | null>(null)
   const [updatingId, setUpdatingId] = useState<number | null>(null)
+  const [restoringId, setRestoringId] = useState<number | null>(null)
+  const [permanentDeletingId, setPermanentDeletingId] = useState<number | null>(null)
+  const [showDeleted, setShowDeleted] = useState(false)
 
   const loadFavorites = async () => {
     if (!token) return
@@ -39,7 +42,8 @@ export default function FavoritesPage() {
 
     try {
       await favoritesApi.delete(token, favoriteId)
-      setFavorites((prev) => prev.filter((f) => f.id !== favoriteId))
+      // Reload favorites to get updated is_deleted status
+      await loadFavorites()
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)
@@ -48,6 +52,50 @@ export default function FavoritesPage() {
       }
     } finally {
       setRemovingId(null)
+    }
+  }
+
+  const handleRestoreFavorite = async (favoriteId: number) => {
+    if (!token) return
+
+    setRestoringId(favoriteId)
+
+    try {
+      await favoritesApi.restore(token, favoriteId)
+      // Reload favorites to get updated is_deleted status
+      await loadFavorites()
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message)
+      } else {
+        setError('Failed to restore favorite')
+      }
+    } finally {
+      setRestoringId(null)
+    }
+  }
+
+  const handlePermanentDelete = async (favoriteId: number) => {
+    if (!token) return
+
+    const confirmed = window.confirm(
+      'Are you sure you want to permanently delete this favorite? This action cannot be undone.'
+    )
+    if (!confirmed) return
+
+    setPermanentDeletingId(favoriteId)
+
+    try {
+      await favoritesApi.permanentDelete(token, favoriteId)
+      setFavorites((prev) => prev.filter((f) => f.id !== favoriteId))
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message)
+      } else {
+        setError('Failed to permanently delete favorite')
+      }
+    } finally {
+      setPermanentDeletingId(null)
     }
   }
 
@@ -76,7 +124,11 @@ export default function FavoritesPage() {
     loadFavorites()
   }, [])
 
-  // Group favorites by state
+  // Separate active and deleted favorites
+  const activeFavorites = favorites.filter((f) => !f.is_deleted)
+  const deletedFavorites = favorites.filter((f) => f.is_deleted)
+
+  // Group active favorites by state
   const groupedFavorites: Record<FavoriteState, Favorite[]> = {
     showing_scheduled: [],
     reached_out: [],
@@ -86,7 +138,7 @@ export default function FavoritesPage() {
     rejected: [],
   }
 
-  favorites.forEach((fav) => {
+  activeFavorites.forEach((fav) => {
     groupedFavorites[fav.current_state].push(fav)
   })
 
@@ -116,28 +168,30 @@ export default function FavoritesPage() {
   ]
 
   return (
-    <div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
       {/* Navigation Bar */}
       <div
         style={{
-          backgroundColor: '#007bff',
-          padding: '15px 30px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '20px 30px',
           color: 'white',
-          marginBottom: '30px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
         }}
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-            <h1 style={{ margin: 0, fontSize: '24px' }}>StreetEasyAndMe</h1>
-            <nav style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px' }}>StreetEasyAndMe</h1>
+            <nav style={{ display: 'flex', gap: '30px' }}>
               <Link
                 to="/"
                 style={{
                   color: 'white',
                   textDecoration: 'none',
-                  fontWeight: 'bold',
-                  borderBottom: '2px solid white',
-                  paddingBottom: '4px',
+                  fontWeight: '600',
+                  fontSize: '15px',
+                  borderBottom: '3px solid white',
+                  paddingBottom: '5px',
+                  transition: 'all 0.2s',
                 }}
               >
                 My Listings
@@ -145,9 +199,11 @@ export default function FavoritesPage() {
               <Link
                 to="/rentals"
                 style={{
-                  color: 'white',
+                  color: 'rgba(255, 255, 255, 0.85)',
                   textDecoration: 'none',
-                  opacity: 0.8,
+                  fontSize: '15px',
+                  paddingBottom: '5px',
+                  transition: 'all 0.2s',
                 }}
               >
                 Browse Rentals
@@ -157,12 +213,22 @@ export default function FavoritesPage() {
           <button
             onClick={logout}
             style={{
-              padding: '8px 16px',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              padding: '10px 20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
               color: 'white',
-              border: '1px solid white',
-              borderRadius: '4px',
+              border: '1.5px solid rgba(255, 255, 255, 0.4)',
+              borderRadius: '8px',
               cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              backdropFilter: 'blur(10px)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
             }}
           >
             Logout
@@ -170,7 +236,7 @@ export default function FavoritesPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px' }}>
 
       {error && (
         <div
@@ -190,7 +256,7 @@ export default function FavoritesPage() {
         <div style={{ textAlign: 'center', padding: '50px' }}>
           Loading favorites...
         </div>
-      ) : favorites.length === 0 ? (
+      ) : activeFavorites.length === 0 && deletedFavorites.length === 0 ? (
         <div
           style={{
             textAlign: 'center',
@@ -207,11 +273,15 @@ export default function FavoritesPage() {
             to="/rentals"
             style={{
               display: 'inline-block',
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
+              padding: '12px 24px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               color: 'white',
               textDecoration: 'none',
-              borderRadius: '4px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '15px',
+              boxShadow: '0 4px 6px rgba(102, 126, 234, 0.25)',
+              transition: 'all 0.2s',
             }}
           >
             Browse Rentals
@@ -224,9 +294,28 @@ export default function FavoritesPage() {
             if (items.length === 0) return null
 
             return (
-              <div key={state} style={{ marginBottom: '40px' }}>
-                <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#495057' }}>
-                  {stateLabels[state]} ({items.length})
+              <div key={state} style={{ marginBottom: '50px' }}>
+                <h2 style={{
+                  fontSize: '22px',
+                  marginBottom: '20px',
+                  color: '#2d3748',
+                  fontWeight: '700',
+                  letterSpacing: '-0.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  {stateLabels[state]}
+                  <span style={{
+                    backgroundColor: '#667eea',
+                    color: 'white',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}>
+                    {items.length}
+                  </span>
                 </h2>
 
                 <div style={{ display: 'grid', gap: '15px' }}>
@@ -244,6 +333,56 @@ export default function FavoritesPage() {
               </div>
             )
           })}
+
+          {/* Deleted Listings Section */}
+          {deletedFavorites.length > 0 && (
+            <div style={{ marginTop: '60px', paddingTop: '30px', borderTop: '2px solid #e5e7eb' }}>
+              <button
+                onClick={() => setShowDeleted(!showDeleted)}
+                style={{
+                  fontSize: '22px',
+                  fontWeight: '700',
+                  letterSpacing: '-0.5px',
+                  color: '#6b7280',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0',
+                  marginBottom: showDeleted ? '20px' : '0',
+                }}
+              >
+                {showDeleted ? '▼' : '▶'} Deleted Listings
+                <span style={{
+                  backgroundColor: '#9ca3af',
+                  color: 'white',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}>
+                  {deletedFavorites.length}
+                </span>
+              </button>
+
+              {showDeleted && (
+                <div style={{ display: 'grid', gap: '15px' }}>
+                  {deletedFavorites.map((favorite) => (
+                    <DeletedFavoriteCard
+                      key={favorite.id}
+                      favorite={favorite}
+                      onRestore={handleRestoreFavorite}
+                      onPermanentDelete={handlePermanentDelete}
+                      isRestoring={restoringId === favorite.id}
+                      isPermanentDeleting={permanentDeletingId === favorite.id}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
       </div>
@@ -294,10 +433,20 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
   return (
     <div
       style={{
-        padding: '20px',
+        padding: '24px',
         backgroundColor: 'white',
-        border: '1px solid #dee2e6',
-        borderRadius: '8px',
+        border: 'none',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
+        transition: 'all 0.2s',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)'
+        e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
       <div
@@ -313,7 +462,13 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
             <img
               src={favorite.rental.image_url}
               alt={formatListingTitle(favorite.rental.url)}
-              style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
+              style={{
+                width: '220px',
+                height: '165px',
+                objectFit: 'cover',
+                borderRadius: '10px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}
             />
           </div>
         )}
@@ -335,7 +490,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                 style={{
                   fontSize: '24px',
                   fontWeight: 'bold',
-                  color: '#28a745',
+                  color: '#10b981',
                   marginBottom: '10px',
                 }}
               >
@@ -345,7 +500,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                 href={favorite.rental.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#007bff', textDecoration: 'none', marginBottom: '15px', display: 'inline-block' }}
+                style={{ color: '#667eea', textDecoration: 'none', marginBottom: '15px', display: 'inline-block' }}
               >
                 View on StreetEasy →
               </a>
@@ -412,13 +567,24 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                   onClick={handleSave}
                   disabled={isUpdating || (state === 'showing_scheduled' && !showingDatetime)}
                   style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#28a745',
+                    padding: '10px 20px',
+                    backgroundColor: '#10b981',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '4px',
+                    borderRadius: '8px',
                     cursor: isUpdating || (state === 'showing_scheduled' && !showingDatetime) ? 'not-allowed' : 'pointer',
                     opacity: isUpdating || (state === 'showing_scheduled' && !showingDatetime) ? 0.6 : 1,
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isUpdating && (state !== 'showing_scheduled' || showingDatetime)) {
+                      e.currentTarget.style.backgroundColor = '#059669'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#10b981'
                   }}
                 >
                   {isUpdating ? 'Saving...' : 'Save Changes'}
@@ -427,13 +593,24 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                   onClick={handleCancel}
                   disabled={isUpdating}
                   style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
+                    padding: '10px 20px',
+                    backgroundColor: '#f3f4f6',
+                    color: '#4b5563',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
                     cursor: isUpdating ? 'not-allowed' : 'pointer',
                     opacity: isUpdating ? 0.6 : 1,
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isUpdating) {
+                      e.currentTarget.style.backgroundColor = '#e5e7eb'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6'
                   }}
                 >
                   Cancel
@@ -452,17 +629,27 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
             )}
 
             {/* History section */}
-            <div style={{ marginTop: '15px' }}>
+            <div style={{ marginTop: '20px' }}>
               <button
                 onClick={() => setShowHistory(!showHistory)}
                 style={{
-                  padding: '6px 12px',
+                  padding: '8px 16px',
                   backgroundColor: 'transparent',
-                  color: '#007bff',
-                  border: '1px solid #007bff',
-                  borderRadius: '4px',
+                  color: '#667eea',
+                  border: '1.5px solid #667eea',
+                  borderRadius: '8px',
                   cursor: 'pointer',
-                  fontSize: '13px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#667eea'
+                  e.currentTarget.style.color = 'white'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#667eea'
                 }}
               >
                 {showHistory ? '▼' : '▶'} View History
@@ -505,16 +692,176 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
             onClick={() => onRemove(favorite.id)}
             disabled={isRemoving}
             style={{
-              padding: '8px 16px',
-              backgroundColor: '#dc3545',
+              padding: '10px 18px',
+              backgroundColor: '#6b7280',
               color: 'white',
               border: 'none',
-              borderRadius: '4px',
+              borderRadius: '8px',
               cursor: isRemoving ? 'not-allowed' : 'pointer',
               opacity: isRemoving ? 0.6 : 1,
+              fontWeight: '600',
+              fontSize: '14px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              if (!isRemoving) {
+                e.currentTarget.style.backgroundColor = '#4b5563'
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#6b7280'
             }}
           >
             {isRemoving ? 'Removing...' : 'Remove'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface DeletedFavoriteCardProps {
+  favorite: Favorite
+  onRestore: (id: number) => void
+  onPermanentDelete: (id: number) => void
+  isRestoring: boolean
+  isPermanentDeleting: boolean
+}
+
+function DeletedFavoriteCard({
+  favorite,
+  onRestore,
+  onPermanentDelete,
+  isRestoring,
+  isPermanentDeleting,
+}: DeletedFavoriteCardProps) {
+  return (
+    <div
+      style={{
+        padding: '24px',
+        backgroundColor: 'white',
+        border: 'none',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
+        opacity: 0.7,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'start',
+          gap: '20px',
+        }}
+      >
+        {favorite.rental?.image_url && (
+          <div style={{ flexShrink: 0 }}>
+            <img
+              src={favorite.rental.image_url}
+              alt={formatListingTitle(favorite.rental.url)}
+              style={{
+                width: '220px',
+                height: '165px',
+                objectFit: 'cover',
+                borderRadius: '10px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                filter: 'grayscale(50%)',
+              }}
+            />
+          </div>
+        )}
+        <div style={{ flex: 1 }}>
+          {favorite.rental ? (
+            <>
+              <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
+                {formatListingTitle(favorite.rental.url)}
+              </h3>
+              <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '10px' }}>
+                {favorite.rental.bedrooms === 0
+                  ? 'Studio'
+                  : `${favorite.rental.bedrooms} Bedroom${favorite.rental.bedrooms > 1 ? 's' : ''}`}
+                {' • '}
+                {favorite.rental.bathrooms} Bath
+                {favorite.rental.bathrooms !== 1 ? 's' : ''}
+              </div>
+              <div
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#10b981',
+                  marginBottom: '10px',
+                }}
+              >
+                ${favorite.rental.price.toLocaleString()}/mo
+              </div>
+              <a
+                href={favorite.rental.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#667eea', textDecoration: 'none', marginBottom: '15px', display: 'inline-block' }}
+              >
+                View on StreetEasy →
+              </a>
+            </>
+          ) : (
+            <div style={{ color: '#6c757d', fontStyle: 'italic' }}>
+              Rental not found
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexShrink: 0 }}>
+          <button
+            onClick={() => onRestore(favorite.id)}
+            disabled={isRestoring || isPermanentDeleting}
+            style={{
+              padding: '10px 18px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: isRestoring || isPermanentDeleting ? 'not-allowed' : 'pointer',
+              opacity: isRestoring || isPermanentDeleting ? 0.6 : 1,
+              fontWeight: '600',
+              fontSize: '14px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              if (!isRestoring && !isPermanentDeleting) {
+                e.currentTarget.style.backgroundColor = '#059669'
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#10b981'
+            }}
+          >
+            {isRestoring ? 'Restoring...' : 'Restore'}
+          </button>
+          <button
+            onClick={() => onPermanentDelete(favorite.id)}
+            disabled={isRestoring || isPermanentDeleting}
+            style={{
+              padding: '10px 18px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: isRestoring || isPermanentDeleting ? 'not-allowed' : 'pointer',
+              opacity: isRestoring || isPermanentDeleting ? 0.6 : 1,
+              fontWeight: '600',
+              fontSize: '14px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              if (!isRestoring && !isPermanentDeleting) {
+                e.currentTarget.style.backgroundColor = '#dc2626'
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ef4444'
+            }}
+          >
+            {isPermanentDeleting ? 'Deleting...' : 'Delete Permanently'}
           </button>
         </div>
       </div>

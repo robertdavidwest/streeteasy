@@ -70,14 +70,46 @@ export default function SignupPage() {
   }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <h1>Sign Up for StreetEasyAndMe</h1>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px 20px'
+    }}>
+      <div style={{
+        maxWidth: '480px',
+        width: '100%',
+        backgroundColor: 'white',
+        padding: '40px',
+        borderRadius: '16px',
+        boxShadow: '0 20px 25px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.04)'
+      }}>
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: '700',
+          marginBottom: '8px',
+          color: '#2d3748',
+          letterSpacing: '-0.5px'
+        }}>Create Account</h1>
+        <p style={{
+          color: '#718096',
+          marginBottom: '32px',
+          fontSize: '15px'
+        }}>Join StreetEasyAndMe</p>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <label
             htmlFor="email"
-            style={{ display: 'block', marginBottom: '5px' }}
+            style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#4a5568'
+            }}
           >
             Email
           </label>
@@ -89,18 +121,34 @@ export default function SignupPage() {
             required
             style={{
               width: '100%',
-              padding: '8px',
-              fontSize: '16px',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
+              padding: '12px 16px',
+              fontSize: '15px',
+              borderRadius: '8px',
+              border: '1.5px solid #e2e8f0',
+              transition: 'all 0.2s',
+              outline: 'none',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#667eea'
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)'
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.boxShadow = 'none'
             }}
           />
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <label
             htmlFor="password"
-            style={{ display: 'block', marginBottom: '5px' }}
+            style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#4a5568'
+            }}
           >
             Password
           </label>
@@ -112,31 +160,42 @@ export default function SignupPage() {
             required
             style={{
               width: '100%',
-              padding: '8px',
-              fontSize: '16px',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
+              padding: '12px 16px',
+              fontSize: '15px',
+              borderRadius: '8px',
+              border: '1.5px solid #e2e8f0',
+              transition: 'all 0.2s',
+              outline: 'none',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#667eea'
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)'
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.boxShadow = 'none'
             }}
           />
 
           {password && (
-            <div style={{ marginTop: '10px' }}>
+            <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f7fafc', borderRadius: '8px' }}>
               <div
                 style={{
-                  fontSize: '12px',
-                  marginBottom: '5px',
-                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  marginBottom: '8px',
+                  fontWeight: '600',
+                  color: '#4a5568'
                 }}
               >
-                Password strength: {getPasswordStrength()}/
-                {passwordRequirements.length}
+                Password strength: {getPasswordStrength()}/{passwordRequirements.length}
               </div>
-              <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px' }}>
+              <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px' }}>
                 {passwordRequirements.map((req, idx) => (
                   <li
                     key={idx}
                     style={{
-                      color: req.test(password) ? '#28a745' : '#dc3545',
+                      color: req.test(password) ? '#10b981' : '#ef4444',
+                      marginBottom: '4px'
                     }}
                   >
                     {req.label}
@@ -147,10 +206,16 @@ export default function SignupPage() {
           )}
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
+        <div style={{ marginBottom: '24px' }}>
           <label
             htmlFor="confirmPassword"
-            style={{ display: 'block', marginBottom: '5px' }}
+            style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#4a5568'
+            }}
           >
             Confirm Password
           </label>
@@ -162,10 +227,20 @@ export default function SignupPage() {
             required
             style={{
               width: '100%',
-              padding: '8px',
-              fontSize: '16px',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
+              padding: '12px 16px',
+              fontSize: '15px',
+              borderRadius: '8px',
+              border: '1.5px solid #e2e8f0',
+              transition: 'all 0.2s',
+              outline: 'none',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#667eea'
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)'
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0'
+              e.currentTarget.style.boxShadow = 'none'
             }}
           />
         </div>
@@ -173,11 +248,13 @@ export default function SignupPage() {
         {error && (
           <div
             style={{
-              padding: '10px',
-              marginBottom: '15px',
-              backgroundColor: '#fee',
-              color: '#c33',
-              borderRadius: '4px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              backgroundColor: '#fee2e2',
+              color: '#991b1b',
+              borderRadius: '8px',
+              fontSize: '14px',
+              border: '1px solid #fecaca'
             }}
           >
             {error}
@@ -187,11 +264,13 @@ export default function SignupPage() {
         {success && (
           <div
             style={{
-              padding: '10px',
-              marginBottom: '15px',
-              backgroundColor: '#d4edda',
-              color: '#155724',
-              borderRadius: '4px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              backgroundColor: '#d1fae5',
+              color: '#065f46',
+              borderRadius: '8px',
+              fontSize: '14px',
+              border: '1px solid #a7f3d0'
             }}
           >
             {success}
@@ -203,38 +282,63 @@ export default function SignupPage() {
           disabled={loading}
           style={{
             width: '100%',
-            padding: '10px',
+            padding: '14px',
             fontSize: '16px',
-            backgroundColor: '#28a745',
+            fontWeight: '600',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
             border: 'none',
-            borderRadius: '4px',
+            borderRadius: '8px',
             cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1,
+            opacity: loading ? 0.7 : 1,
+            transition: 'all 0.2s',
+            boxShadow: loading ? 'none' : '0 4px 6px rgba(102, 126, 234, 0.25)'
+          }}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 6px 12px rgba(102, 126, 234, 0.35)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(102, 126, 234, 0.25)'
           }}
         >
           {loading ? 'Creating account...' : 'Sign Up'}
         </button>
       </form>
 
-      <p style={{ marginTop: '20px', textAlign: 'center' }}>
+      <p style={{
+        marginTop: '24px',
+        textAlign: 'center',
+        fontSize: '14px',
+        color: '#718096'
+      }}>
         Already have an account?{' '}
-        <Link to="/login" style={{ color: '#007bff' }}>
+        <Link to="/login" style={{
+          color: '#667eea',
+          textDecoration: 'none',
+          fontWeight: '600'
+        }}>
           Login
         </Link>
       </p>
 
       <div
         style={{
-          marginTop: '30px',
-          padding: '15px',
-          backgroundColor: '#fff3cd',
-          borderRadius: '4px',
+          marginTop: '24px',
+          padding: '16px',
+          backgroundColor: '#fef3c7',
+          borderRadius: '8px',
           fontSize: '14px',
+          border: '1px solid #fde68a',
+          color: '#92400e'
         }}
       >
         <strong>Note:</strong> Only the first person to sign up can create an
         account. Registration will be closed after that.
+      </div>
       </div>
     </div>
   )

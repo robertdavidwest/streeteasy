@@ -117,26 +117,28 @@ export default function RentalsPage() {
   }
 
   return (
-    <div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
       {/* Navigation Bar */}
       <div
         style={{
-          backgroundColor: '#007bff',
-          padding: '15px 30px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '20px 30px',
           color: 'white',
-          marginBottom: '30px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
         }}
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-            <h1 style={{ margin: 0, fontSize: '24px' }}>StreetEasyAndMe</h1>
-            <nav style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px' }}>StreetEasyAndMe</h1>
+            <nav style={{ display: 'flex', gap: '30px' }}>
               <Link
                 to="/"
                 style={{
-                  color: 'white',
+                  color: 'rgba(255, 255, 255, 0.85)',
                   textDecoration: 'none',
-                  opacity: 0.8,
+                  fontSize: '15px',
+                  paddingBottom: '5px',
+                  transition: 'all 0.2s',
                 }}
               >
                 My Listings
@@ -146,9 +148,11 @@ export default function RentalsPage() {
                 style={{
                   color: 'white',
                   textDecoration: 'none',
-                  fontWeight: 'bold',
-                  borderBottom: '2px solid white',
-                  paddingBottom: '4px',
+                  fontWeight: '600',
+                  fontSize: '15px',
+                  borderBottom: '3px solid white',
+                  paddingBottom: '5px',
+                  transition: 'all 0.2s',
                 }}
               >
                 Browse Rentals
@@ -158,12 +162,22 @@ export default function RentalsPage() {
           <button
             onClick={logout}
             style={{
-              padding: '8px 16px',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              padding: '10px 20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
               color: 'white',
-              border: '1px solid white',
-              borderRadius: '4px',
+              border: '1.5px solid rgba(255, 255, 255, 0.4)',
+              borderRadius: '8px',
               cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              backdropFilter: 'blur(10px)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
             }}
           >
             Logout
@@ -171,7 +185,40 @@ export default function RentalsPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px' }}>
+
+      {/* MVP Disclaimer */}
+      <div style={{
+        padding: '20px 24px',
+        backgroundColor: '#fef3c7',
+        border: '2px solid #fde68a',
+        borderRadius: '12px',
+        marginBottom: '30px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+          <span style={{ fontSize: '24px' }}>ℹ️</span>
+          <div>
+            <h3 style={{
+              margin: '0 0 8px 0',
+              fontSize: '18px',
+              fontWeight: '700',
+              color: '#92400e'
+            }}>
+              MVP Notice
+            </h3>
+            <p style={{
+              margin: 0,
+              color: '#92400e',
+              fontSize: '15px',
+              lineHeight: '1.5'
+            }}>
+              This is an early version showing rentals in <strong>Greenpoint, Brooklyn only</strong>.
+              The listings are automatically scraped and updated from StreetEasy.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Filters */}
       <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '20px' }}>
@@ -224,10 +271,51 @@ export default function RentalsPage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={handleApplyFilters} style={{ padding: '8px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button
+            onClick={handleApplyFilters}
+            style={{
+              padding: '10px 24px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '14px',
+              transition: 'all 0.2s',
+              boxShadow: '0 2px 4px rgba(102, 126, 234, 0.25)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.35)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.25)'
+            }}
+          >
             Apply Filters
           </button>
-          <button onClick={handleClearFilters} style={{ padding: '8px 20px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button
+            onClick={handleClearFilters}
+            style={{
+              padding: '10px 24px',
+              backgroundColor: '#f3f4f6',
+              color: '#4b5563',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '14px',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#e5e7eb'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f3f4f6'
+            }}
+          >
             Clear
           </button>
         </div>
@@ -253,14 +341,36 @@ export default function RentalsPage() {
 
           <div style={{ display: 'grid', gap: '15px' }}>
             {rentals.map((rental) => (
-              <div key={rental.id} style={{ padding: '20px', backgroundColor: 'white', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+              <div key={rental.id} style={{
+                padding: '24px',
+                backgroundColor: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05)'
+                e.currentTarget.style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '20px' }}>
                   {rental.image_url && (
                     <div style={{ flexShrink: 0 }}>
                       <img
                         src={rental.image_url}
                         alt={formatListingTitle(rental.url)}
-                        style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
+                        style={{
+                          width: '220px',
+                          height: '165px',
+                          objectFit: 'cover',
+                          borderRadius: '10px',
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                        }}
                       />
                     </div>
                   )}
@@ -273,10 +383,14 @@ export default function RentalsPage() {
                       {' • '}
                       {rental.bathrooms} Bath{rental.bathrooms !== 1 ? 's' : ''}
                     </div>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#28a745', marginBottom: '10px' }}>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#10b981', marginBottom: '10px' }}>
                       ${rental.price.toLocaleString()}/mo
                     </div>
-                    <a href={rental.url} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'none' }}>
+                    <a href={rental.url} target="_blank" rel="noopener noreferrer" style={{
+                      color: '#667eea',
+                      textDecoration: 'none',
+                      fontWeight: '500'
+                    }}>
                       View on StreetEasy →
                     </a>
                   </div>
@@ -286,13 +400,23 @@ export default function RentalsPage() {
                       disabled={favoritingId === rental.id}
                       style={{
                         padding: '10px 20px',
-                        backgroundColor: isFavorited(rental.id) ? '#28a745' : '#ffc107',
-                        color: isFavorited(rental.id) ? 'white' : '#000',
+                        backgroundColor: isFavorited(rental.id) ? '#10b981' : '#fbbf24',
+                        color: 'white',
                         border: 'none',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         cursor: favoritingId === rental.id ? 'not-allowed' : 'pointer',
-                        fontWeight: 'bold',
+                        fontWeight: '600',
+                        fontSize: '14px',
                         opacity: favoritingId === rental.id ? 0.6 : 1,
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (favoritingId !== rental.id) {
+                          e.currentTarget.style.backgroundColor = isFavorited(rental.id) ? '#059669' : '#f59e0b'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = isFavorited(rental.id) ? '#10b981' : '#fbbf24'
                       }}
                     >
                       {favoritingId === rental.id
@@ -312,17 +436,69 @@ export default function RentalsPage() {
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
-              style={{ padding: '8px 16px', backgroundColor: page === 0 ? '#e9ecef' : '#007bff', color: page === 0 ? '#6c757d' : 'white', border: 'none', borderRadius: '4px', cursor: page === 0 ? 'not-allowed' : 'pointer' }}
+              style={{
+                padding: '10px 20px',
+                background: page === 0 ? '#f3f4f6' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: page === 0 ? '#9ca3af' : 'white',
+                border: page === 0 ? '1px solid #e5e7eb' : 'none',
+                borderRadius: '8px',
+                cursor: page === 0 ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                fontSize: '14px',
+                transition: 'all 0.2s',
+                boxShadow: page === 0 ? 'none' : '0 2px 4px rgba(102, 126, 234, 0.25)'
+              }}
+              onMouseEnter={(e) => {
+                if (page !== 0) {
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.35)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (page !== 0) {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.25)'
+                }
+              }}
             >
               Previous
             </button>
-            <span style={{ padding: '8px 16px', display: 'flex', alignItems: 'center' }}>
+            <span style={{
+              padding: '10px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              fontWeight: '600',
+              color: '#4b5563'
+            }}>
               Page {page + 1}
             </span>
             <button
               onClick={() => setPage(p => p + 1)}
               disabled={rentals.length < limit}
-              style={{ padding: '8px 16px', backgroundColor: rentals.length < limit ? '#e9ecef' : '#007bff', color: rentals.length < limit ? '#6c757d' : 'white', border: 'none', borderRadius: '4px', cursor: rentals.length < limit ? 'not-allowed' : 'pointer' }}
+              style={{
+                padding: '10px 20px',
+                background: rentals.length < limit ? '#f3f4f6' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: rentals.length < limit ? '#9ca3af' : 'white',
+                border: rentals.length < limit ? '1px solid #e5e7eb' : 'none',
+                borderRadius: '8px',
+                cursor: rentals.length < limit ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                fontSize: '14px',
+                transition: 'all 0.2s',
+                boxShadow: rentals.length < limit ? 'none' : '0 2px 4px rgba(102, 126, 234, 0.25)'
+              }}
+              onMouseEnter={(e) => {
+                if (rentals.length >= limit) {
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.35)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (rentals.length >= limit) {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.25)'
+                }
+              }}
             >
               Next
             </button>

@@ -54,6 +54,7 @@ interface Favorite {
   rental_id: string
   current_state: FavoriteState
   showing_datetime: string | null
+  is_deleted: boolean
   state_updated_at: string
   created_at: string
   updated_at: string
@@ -216,6 +217,40 @@ export const favoritesApi = {
       },
     })
     return handleResponse<Favorite>(response)
+  },
+
+  async restore(token: string, favoriteId: number): Promise<void> {
+    const response = await fetch(`${API_URL}/api/favorites/${favoriteId}/restore`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to restore favorite',
+        response.status,
+        error
+      )
+    }
+  },
+
+  async permanentDelete(token: string, favoriteId: number): Promise<void> {
+    const response = await fetch(`${API_URL}/api/favorites/${favoriteId}/permanent`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to permanently delete favorite',
+        response.status,
+        error
+      )
+    }
   },
 }
 

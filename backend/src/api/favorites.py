@@ -153,6 +153,17 @@ def update_favorite(
     # Clear the reason if moving away from rejected state
     elif new_state != "rejected":
         favorite.not_interested_reason = None
+    # Update interested_reason if state is interested
+    if new_state == "interested" and update_data.interested_reason is not None:
+        favorite.interested_reason = update_data.interested_reason
+    # Update applied_reason if state is applied
+    if new_state == "applied" and update_data.applied_reason is not None:
+        favorite.applied_reason = update_data.applied_reason
+    # Update viewed_reason if state is viewed
+    if new_state == "viewed" and update_data.viewed_reason is not None:
+        favorite.viewed_reason = update_data.viewed_reason
+    # Note: We don't clear these reasons when moving away from their states
+    # because the user wants them to be permanent comments
     favorite.state_updated_at = datetime.utcnow()
 
     db.commit()

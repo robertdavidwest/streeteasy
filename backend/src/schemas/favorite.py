@@ -30,6 +30,9 @@ class FavoriteUpdate(BaseModel):
     current_state: FavoriteState
     showing_datetime: Optional[datetime] = None
     not_interested_reason: Optional[str] = None
+    interested_reason: Optional[str] = None
+    applied_reason: Optional[str] = None
+    viewed_reason: Optional[str] = None
 
 
 class FavoriteResponse(BaseModel):
@@ -41,6 +44,9 @@ class FavoriteResponse(BaseModel):
     current_state: str
     showing_datetime: Optional[datetime] = None
     not_interested_reason: Optional[str] = None
+    interested_reason: Optional[str] = None
+    applied_reason: Optional[str] = None
+    viewed_reason: Optional[str] = None
     is_deleted: bool
     state_updated_at: datetime
     created_at: datetime

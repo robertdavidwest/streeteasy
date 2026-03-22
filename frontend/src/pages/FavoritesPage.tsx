@@ -403,17 +403,36 @@ interface FavoriteCardProps {
 }
 
 function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdating }: FavoriteCardProps) {
+  // Helper to convert UTC datetime to local datetime string for datetime-local input
+  const toLocalDatetimeString = (isoString: string | null) => {
+    if (!isoString) return ''
+    const date = new Date(isoString)
+    // Get local time components
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
+
   const [state, setState] = useState<FavoriteState>(favorite.current_state)
   const [showingDatetime, setShowingDatetime] = useState(
-    favorite.showing_datetime ? new Date(favorite.showing_datetime).toISOString().slice(0, 16) : ''
+    toLocalDatetimeString(favorite.showing_datetime)
   )
   const [showHistory, setShowHistory] = useState(false)
+
+  // Sync local state when favorite prop changes (after successful update)
+  useEffect(() => {
+    setState(favorite.current_state)
+    setShowingDatetime(toLocalDatetimeString(favorite.showing_datetime))
+  }, [favorite.current_state, favorite.showing_datetime])
 
   // Track if there are unsaved changes
   const hasChanges =
     state !== favorite.current_state ||
     (state === 'showing_scheduled' &&
-      showingDatetime !== (favorite.showing_datetime ? new Date(favorite.showing_datetime).toISOString().slice(0, 16) : ''))
+      showingDatetime !== toLocalDatetimeString(favorite.showing_datetime))
 
   const handleSave = () => {
     const updateData: { current_state: FavoriteState; showing_datetime?: string } = {
@@ -421,6 +440,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
     }
 
     if (state === 'showing_scheduled' && showingDatetime) {
+      // datetime-local gives us local time, convert to ISO (UTC) for backend
       updateData.showing_datetime = new Date(showingDatetime).toISOString()
     }
 
@@ -429,9 +449,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
 
   const handleCancel = () => {
     setState(favorite.current_state)
-    setShowingDatetime(
-      favorite.showing_datetime ? new Date(favorite.showing_datetime).toISOString().slice(0, 16) : ''
-    )
+    setShowingDatetime(toLocalDatetimeString(favorite.showing_datetime))
   }
 
   return (

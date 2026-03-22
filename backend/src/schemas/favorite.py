@@ -1,6 +1,6 @@
 """Favorite schemas."""
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from uuid import UUID
 from typing import Optional, Literal
 
@@ -46,10 +46,17 @@ class FavoriteResponse(BaseModel):
     rental: Optional[RentalResponse] = None
     events: list[EventResponse] = []
 
+    @field_serializer('showing_datetime', 'state_updated_at', 'created_at', 'updated_at')
+    def serialize_datetime(self, dt: Optional[datetime], _info):
+        """Serialize datetime with Z suffix for UTC times."""
+        if dt is None:
+            return None
+        # If datetime is naive (no tzinfo), assume it's UTC and add Z
+        if dt.tzinfo is None:
+            return dt.isoformat() + 'Z'
+        return dt.isoformat()
+
     class Config:
         """Pydantic config."""
 
         from_attributes = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat() + 'Z' if v and not v.tzinfo else v.isoformat()
-        }

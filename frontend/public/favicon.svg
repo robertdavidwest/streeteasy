@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Building -->
+  <rect x="20" y="30" width="60" height="60" fill="url(#grad)" rx="4"/>
+
+  <!-- Windows -->
+  <rect x="30" y="40" width="12" height="12" fill="white" opacity="0.9" rx="2"/>
+  <rect x="58" y="40" width="12" height="12" fill="white" opacity="0.9" rx="2"/>
+  <rect x="30" y="58" width="12" height="12" fill="white" opacity="0.9" rx="2"/>
+  <rect x="58" y="58" width="12" height="12" fill="white" opacity="0.9" rx="2"/>
+
+  <!-- Door -->
+  <rect x="44" y="70" width="12" height="20" fill="white" opacity="0.9" rx="2"/>
+</svg>

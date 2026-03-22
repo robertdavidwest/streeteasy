@@ -242,21 +242,29 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
   )
   const [showHistory, setShowHistory] = useState(false)
 
-  const handleStateChange = (newState: FavoriteState) => {
-    setState(newState)
-    if (newState !== 'showing_scheduled') {
-      onUpdateState(favorite.id, { current_state: newState })
+  // Track if there are unsaved changes
+  const hasChanges =
+    state !== favorite.current_state ||
+    (state === 'showing_scheduled' &&
+      showingDatetime !== (favorite.showing_datetime ? new Date(favorite.showing_datetime).toISOString().slice(0, 16) : ''))
+
+  const handleSave = () => {
+    const updateData: { current_state: FavoriteState; showing_datetime?: string } = {
+      current_state: state,
     }
+
+    if (state === 'showing_scheduled' && showingDatetime) {
+      updateData.showing_datetime = new Date(showingDatetime).toISOString()
+    }
+
+    onUpdateState(favorite.id, updateData)
   }
 
-  const handleDatetimeChange = (datetime: string) => {
-    setShowingDatetime(datetime)
-    if (datetime) {
-      onUpdateState(favorite.id, {
-        current_state: 'showing_scheduled',
-        showing_datetime: new Date(datetime).toISOString(),
-      })
-    }
+  const handleCancel = () => {
+    setState(favorite.current_state)
+    setShowingDatetime(
+      favorite.showing_datetime ? new Date(favorite.showing_datetime).toISOString().slice(0, 16) : ''
+    )
   }
 
   return (
@@ -332,13 +340,13 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                 </label>
                 <select
                   value={state}
-                  onChange={(e) => handleStateChange(e.target.value as FavoriteState)}
+                  onChange={(e) => setState(e.target.value as FavoriteState)}
                   disabled={isUpdating}
                   style={{
                     width: '100%',
                     padding: '8px',
                     borderRadius: '4px',
-                    border: '1px solid #ccc',
+                    border: hasChanges ? '2px solid #ffc107' : '1px solid #ccc',
                     opacity: isUpdating ? 0.6 : 1,
                   }}
                 >
@@ -359,19 +367,55 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                   <input
                     type="datetime-local"
                     value={showingDatetime}
-                    onChange={(e) => handleDatetimeChange(e.target.value)}
+                    onChange={(e) => setShowingDatetime(e.target.value)}
                     disabled={isUpdating}
                     style={{
                       width: '100%',
                       padding: '8px',
                       borderRadius: '4px',
-                      border: '1px solid #ccc',
+                      border: hasChanges ? '2px solid #ffc107' : '1px solid #ccc',
                       opacity: isUpdating ? 0.6 : 1,
                     }}
                   />
                 </div>
               )}
             </div>
+
+            {/* Save/Cancel buttons */}
+            {hasChanges && (
+              <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={handleSave}
+                  disabled={isUpdating || (state === 'showing_scheduled' && !showingDatetime)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: isUpdating || (state === 'showing_scheduled' && !showingDatetime) ? 'not-allowed' : 'pointer',
+                    opacity: isUpdating || (state === 'showing_scheduled' && !showingDatetime) ? 0.6 : 1,
+                  }}
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={isUpdating}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: isUpdating ? 'not-allowed' : 'pointer',
+                    opacity: isUpdating ? 0.6 : 1,
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
 
             {/* Always show showing datetime if it exists */}
             {favorite.showing_datetime && (

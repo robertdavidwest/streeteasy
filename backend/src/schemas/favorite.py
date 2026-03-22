@@ -50,3 +50,6 @@ class FavoriteResponse(BaseModel):
         """Pydantic config."""
 
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() + 'Z' if v and not v.tzinfo else v.isoformat()
+        }

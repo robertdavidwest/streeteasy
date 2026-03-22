@@ -18,3 +18,4 @@ class Rental(Base):
     bathrooms = Column(Float, nullable=False)
     price = Column(Integer, nullable=False)
     image_url = Column(String, nullable=True)
+    area_name = Column(String, nullable=True)

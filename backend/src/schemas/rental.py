@@ -12,6 +12,7 @@ class RentalResponse(BaseModel):
     bathrooms: float
     price: int
     image_url: Optional[str] = None
+    area_name: Optional[str] = None
 
     class Config:
         """Pydantic config."""

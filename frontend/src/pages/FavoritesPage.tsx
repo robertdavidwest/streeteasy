@@ -171,6 +171,7 @@ export default function FavoritesPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
       {/* Navigation Bar */}
       <div
+        className="header-wrapper"
         style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           padding: '20px 30px',
@@ -178,12 +179,12 @@ export default function FavoritesPage() {
           boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
         }}
       >
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+        <div className="header-container" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
             <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
-              <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', cursor: 'pointer' }}>StreetEasyAndMe</h1>
+              <h1 className="header-title" style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', cursor: 'pointer' }}>StreetEasyAndMe</h1>
             </Link>
-            <nav style={{ display: 'flex', gap: '30px' }}>
+            <nav className="header-nav" style={{ display: 'flex', gap: '30px' }}>
               <Link
                 to="/"
                 style={{
@@ -213,6 +214,7 @@ export default function FavoritesPage() {
             </nav>
           </div>
           <button
+            className="header-logout"
             onClick={logout}
             style={{
               padding: '10px 20px',
@@ -238,7 +240,7 @@ export default function FavoritesPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px' }}>
+      <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px' }}>
 
       {error && (
         <div

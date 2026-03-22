@@ -16,3 +16,97 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Prevent horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body > div {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Mobile responsive header */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+
+  .header-left {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    width: 100%;
+  }
+
+  .header-title {
+    font-size: 20px !important;
+  }
+
+  .header-nav {
+    gap: 15px !important;
+  }
+
+  .header-logout {
+    align-self: flex-start !important;
+    width: auto !important;
+  }
+
+  .header-wrapper {
+    padding: 15px !important;
+  }
+
+  .page-container {
+    padding: 20px 15px !important;
+    max-width: 100% !important;
+  }
+
+  /* Force all containers to fit */
+  * {
+    max-width: 100%;
+  }
+
+  /* Fix form layouts */
+  form {
+    padding: 15px !important;
+  }
+
+  /* Fix grid layouts */
+  div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Fix cards */
+  div[style*="display: flex"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* Ensure text wraps */
+  h1, h2, h3, p, span, a {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+}
+
+/* Small phone adjustments */
+@media (max-width: 480px) {
+  .header-title {
+    font-size: 18px !important;
+  }
+
+  .header-nav a {
+    font-size: 14px !important;
+  }
+
+  .header-wrapper {
+    padding: 12px !important;
+  }
+
+  .page-container {
+    padding: 15px 10px !important;
+  }
+}

@@ -440,8 +440,17 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
     }
 
     if (state === 'showing_scheduled' && showingDatetime) {
-      // datetime-local gives us local time, convert to ISO (UTC) for backend
-      updateData.showing_datetime = new Date(showingDatetime).toISOString()
+      // datetime-local format: "2026-03-22T08:00"
+      // Some browsers interpret this string ambiguously, so parse explicitly
+      const [datePart, timePart] = showingDatetime.split('T')
+      const [year, month, day] = datePart.split('-').map(Number)
+      const [hours, minutes] = timePart.split(':').map(Number)
+
+      // Create date object explicitly in local timezone
+      const localDate = new Date(year, month - 1, day, hours, minutes)
+
+      // Convert to ISO (UTC) for backend
+      updateData.showing_datetime = localDate.toISOString()
     }
 
     onUpdateState(favorite.id, updateData)

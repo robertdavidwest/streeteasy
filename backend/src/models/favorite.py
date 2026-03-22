@@ -27,6 +27,11 @@ class Favorite(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     rental_id = Column(String, ForeignKey("rentals.id"), nullable=False)
+    current_state = Column(
+        String, nullable=False, default="interested"
+    )  # interested, reached_out, showing_scheduled, viewed, applied, rejected
+    showing_datetime = Column(DateTime, nullable=True)
+    state_updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
         DateTime,

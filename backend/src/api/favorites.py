@@ -1,4 +1,5 @@
 """Favorites routes."""
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
@@ -6,7 +7,8 @@ from src.core.database import get_db
 from src.models.user import User
 from src.models.favorite import Favorite
 from src.models.rental import Rental
-from src.schemas.favorite import FavoriteCreate, FavoriteResponse
+from src.models.event import Event, EventType
+from src.schemas.favorite import FavoriteCreate, FavoriteUpdate, FavoriteResponse
 from src.services.auth import get_current_user
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
@@ -101,6 +103,61 @@ def get_favorite(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Favorite not found",
         )
+    return favorite
+
+
+@router.put("/{favorite_id}", response_model=FavoriteResponse)
+def update_favorite(
+    favorite_id: int,
+    update_data: FavoriteUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Favorite:
+    """Update a favorite's state."""
+    favorite = (
+        db.query(Favorite)
+        .filter(
+            Favorite.id == favorite_id, Favorite.user_id == current_user.id
+        )
+        .first()
+    )
+    if not favorite:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Favorite not found",
+        )
+
+    # Record state change as event
+    old_state = favorite.current_state
+    new_state = update_data.current_state
+
+    if old_state != new_state:
+        # Convert state string to EventType enum
+        event_type = EventType(new_state)
+        event = Event(
+            favorite_id=favorite_id,
+            event_type=event_type,
+            event_date=datetime.utcnow(),
+            notes=f"Changed from {old_state}",
+        )
+        db.add(event)
+
+    # Update favorite state
+    favorite.current_state = new_state
+    favorite.showing_datetime = update_data.showing_datetime
+    favorite.state_updated_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(favorite)
+
+    # Load relationships
+    favorite = (
+        db.query(Favorite)
+        .filter(Favorite.id == favorite.id)
+        .options(joinedload(Favorite.rental), joinedload(Favorite.events))
+        .first()
+    )
+
     return favorite
 
 

@@ -12,12 +12,14 @@ if TYPE_CHECKING:
 
 
 class EventType(str, enum.Enum):
-    """Event type enum."""
+    """Event type enum - matches favorite states."""
 
+    INTERESTED = "interested"
     REACHED_OUT = "reached_out"
+    SHOWING_SCHEDULED = "showing_scheduled"
     VIEWED = "viewed"
     APPLIED = "applied"
-    CUSTOM = "custom"
+    REJECTED = "rejected"
 
 
 class Event(Base):
@@ -27,7 +29,10 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     favorite_id = Column(Integer, ForeignKey("favorites.id"), nullable=False)
-    event_type = Column(Enum(EventType), nullable=False)
+    event_type = Column(
+        Enum(EventType, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+    )
     event_date = Column(DateTime, nullable=False)
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

@@ -40,14 +40,30 @@ interface RentalsParams {
   search?: string
 }
 
+type FavoriteState =
+  | 'interested'
+  | 'reached_out'
+  | 'showing_scheduled'
+  | 'viewed'
+  | 'applied'
+  | 'rejected'
+
 interface Favorite {
   id: number
   user_id: string
   rental_id: string
+  current_state: FavoriteState
+  showing_datetime: string | null
+  state_updated_at: string
   created_at: string
   updated_at: string
   rental: Rental | null
   events: Event[]
+}
+
+interface FavoriteUpdate {
+  current_state: FavoriteState
+  showing_datetime?: string | null
 }
 
 interface Event {
@@ -164,6 +180,18 @@ export const favoritesApi = {
     return handleResponse<Favorite>(response)
   },
 
+  async update(token: string, favoriteId: number, data: FavoriteUpdate): Promise<Favorite> {
+    const response = await fetch(`${API_URL}/api/favorites/${favoriteId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Favorite>(response)
+  },
+
   async delete(token: string, favoriteId: number): Promise<void> {
     const response = await fetch(`${API_URL}/api/favorites/${favoriteId}`, {
       method: 'DELETE',
@@ -247,4 +275,4 @@ export const eventsApi = {
 }
 
 export { ApiError }
-export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams, Favorite, Event, EventCreate, EventUpdate }
+export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams, Favorite, FavoriteState, FavoriteUpdate, Event, EventCreate, EventUpdate }

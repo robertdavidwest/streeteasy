@@ -800,9 +800,18 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
             {/* Always show showing datetime if it exists */}
             {favorite.showing_datetime && (
               <div style={{ marginTop: '10px', fontSize: '14px', color: '#6c757d' }}>
-                {state === 'showing_scheduled' && 'Showing scheduled for: '}
-                {state === 'viewed' && 'Showing was on: '}
-                {state !== 'showing_scheduled' && state !== 'viewed' && 'Showing date: '}
+                {(() => {
+                  const showingDate = new Date(favorite.showing_datetime)
+                  const isPast = showingDate < new Date()
+
+                  if (state === 'viewed') {
+                    return 'Showing was on: '
+                  } else if (isPast) {
+                    return 'Visited on: '
+                  } else {
+                    return 'Showing scheduled for: '
+                  }
+                })()}
                 {new Date(favorite.showing_datetime).toLocaleString()}
               </div>
             )}

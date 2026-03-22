@@ -198,7 +198,16 @@ export default function RentalsPage() {
           <div style={{ display: 'grid', gap: '15px' }}>
             {rentals.map((rental) => (
               <div key={rental.id} style={{ padding: '20px', backgroundColor: 'white', border: '1px solid #dee2e6', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '20px' }}>
+                  {rental.image_url && (
+                    <div style={{ flexShrink: 0 }}>
+                      <img
+                        src={rental.image_url}
+                        alt={formatListingTitle(rental.url)}
+                        style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
+                      />
+                    </div>
+                  )}
                   <div style={{ flex: 1 }}>
                     <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
                       {formatListingTitle(rental.url)}
@@ -215,7 +224,7 @@ export default function RentalsPage() {
                       View on StreetEasy →
                     </a>
                   </div>
-                  <div>
+                  <div style={{ flexShrink: 0 }}>
                     <button
                       onClick={() => handleToggleFavorite(rental)}
                       disabled={favoritingId === rental.id}

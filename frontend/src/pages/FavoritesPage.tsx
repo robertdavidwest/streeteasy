@@ -212,8 +212,18 @@ export default function FavoritesPage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'start',
+                    gap: '20px',
                   }}
                 >
+                  {favorite.rental?.image_url && (
+                    <div style={{ flexShrink: 0 }}>
+                      <img
+                        src={favorite.rental.image_url}
+                        alt={formatListingTitle(favorite.rental.url)}
+                        style={{ width: '200px', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
+                      />
+                    </div>
+                  )}
                   <div style={{ flex: 1 }}>
                     {favorite.rental ? (
                       <>
@@ -368,7 +378,7 @@ export default function FavoritesPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexShrink: 0 }}>
                     <button
                       onClick={() => handleRemoveFavorite(favorite.id)}
                       disabled={removingId === favorite.id}

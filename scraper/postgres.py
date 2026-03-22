@@ -43,7 +43,8 @@ def select_by_id(rental_id: str) -> Optional[Dict[str, Any]]:
                     'url': row[1],
                     'bedrooms': row[2],
                     'bathrooms': row[3],
-                    'price': row[4]
+                    'price': row[4],
+                    'image_url': row[5]
                 }
             return None
 
@@ -59,8 +60,9 @@ def get_all_ids() -> set:
 def write_listings(listings: List[RentalListing]):
     """Write rental listings to the database."""
     sql = """
-        INSERT INTO rentals (id, url, bedrooms, bathrooms, price)
-        VALUES (%(id)s, %(url)s, %(bedrooms)s, %(bathrooms)s, %(price)s)
+        INSERT INTO rentals (id, url, bedrooms, bathrooms, price, image_url)
+        VALUES (%(id)s, %(url)s, %(bedrooms)s, %(bathrooms)s, %(price)s,
+                %(image_url)s)
         ON CONFLICT (id) DO NOTHING
     """
     with get_connection() as conn:

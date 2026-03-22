@@ -19,6 +19,7 @@ class RentalListing(TypedDict, total=False):
     bedrooms: int
     bathrooms: float  # Includes half bathrooms as 0.5
     price: int
+    image_url: Optional[str]
 
     # Available fields from API (commented out for future use)
     # street: str
@@ -31,7 +32,6 @@ class RentalListing(TypedDict, total=False):
     # tier: str
     # latitude: Optional[float]
     # longitude: Optional[float]
-    # photo_key: Optional[str]
     # rello_express_enabled: Optional[bool]
     # rello_express_link: Optional[str]
     # rello_express_rental_id: Optional[str]
@@ -61,6 +61,16 @@ def extract_listing_data(node: Dict[str, Any]) -> RentalListing:
 
     listing['price'] = node['price']
 
+    # Extract photo and build image URL
+    lead_media = node.get('leadMedia', {})
+    if lead_media and 'photo' in lead_media:
+        photo_key = lead_media['photo'].get('key')
+        if photo_key:
+            # StreetEasy uses Zillow's CDN for images
+            listing['image_url'] = f"https://photos.zillowstatic.com/fp/{photo_key}-se_extra_large_1500_800.webp"
+    else:
+        listing['image_url'] = None
+
     # Uncomment to extract additional fields as needed:
     # listing['street'] = node.get('street')
     # listing['unit'] = node.get('unit')
@@ -76,11 +86,6 @@ def extract_listing_data(node: Dict[str, Any]) -> RentalListing:
     # if geo_point:
     #     listing['latitude'] = geo_point.get('latitude')
     #     listing['longitude'] = geo_point.get('longitude')
-
-    # # Lead media/photo
-    # lead_media = node.get('leadMedia', {})
-    # if lead_media and 'photo' in lead_media:
-    #     listing['photo_key'] = lead_media['photo'].get('key')
 
     # # Rello Express data
     # rello = node.get('relloExpress', {})

@@ -23,7 +23,9 @@ def create_table():
         url TEXT NOT NULL,
         bedrooms INTEGER NOT NULL,
         bathrooms REAL NOT NULL,
-        price INTEGER NOT NULL
+        price INTEGER NOT NULL,
+        image_url TEXT,
+        area_name TEXT
     )
     """
     with get_connection() as conn:
@@ -44,7 +46,8 @@ def select_by_id(rental_id: str) -> Optional[Dict[str, Any]]:
                     'bedrooms': row[2],
                     'bathrooms': row[3],
                     'price': row[4],
-                    'image_url': row[5]
+                    'image_url': row[5] if len(row) > 5 else None,
+                    'area_name': row[6] if len(row) > 6 else None
                 }
             return None
 
@@ -60,9 +63,9 @@ def get_all_ids() -> set:
 def write_listings(listings: List[RentalListing]):
     """Write rental listings to the database."""
     sql = """
-        INSERT INTO rentals (id, url, bedrooms, bathrooms, price, image_url)
+        INSERT INTO rentals (id, url, bedrooms, bathrooms, price, image_url, area_name)
         VALUES (%(id)s, %(url)s, %(bedrooms)s, %(bathrooms)s, %(price)s,
-                %(image_url)s)
+                %(image_url)s, %(area_name)s)
         ON CONFLICT (id) DO NOTHING
     """
     with get_connection() as conn:

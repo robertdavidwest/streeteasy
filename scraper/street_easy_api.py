@@ -20,6 +20,7 @@ class RentalListing(TypedDict, total=False):
     bathrooms: float  # Includes half bathrooms as 0.5
     price: int
     image_url: Optional[str]
+    area_name: Optional[str]  # Area/neighborhood name from API
 
     # Available fields from API (commented out for future use)
     # street: str
@@ -71,11 +72,13 @@ def extract_listing_data(node: Dict[str, Any]) -> RentalListing:
     else:
         listing['image_url'] = None
 
-    # Uncomment to extract additional fields as needed:
+    # Extract area name from the API
+    listing['area_name'] = node.get('areaName')
+
+    # Additional fields available if needed:
     # listing['street'] = node.get('street')
     # listing['unit'] = node.get('unit')
     # listing['half_bathroom_count'] = node.get('halfBathroomCount')
-    # listing['area_name'] = node.get('areaName')
     # listing['building_type'] = node.get('buildingType')
     # listing['status'] = node.get('status')
     # listing['source_group_label'] = node.get('sourceGroupLabel')
@@ -99,12 +102,12 @@ def extract_listing_data(node: Dict[str, Any]) -> RentalListing:
 
 def fetch_rentals(
     api_url: str,
-    area_code: int,
+    area_codes: List[int],
     price_min: Optional[int],
     price_max: Optional[int],
     bedrooms_min: int,
     bedrooms_max: int,
-    bounding_box: Dict[str, Dict[str, float]],
+    bounding_box: Optional[Dict[str, Dict[str, float]]] = None,
     results_per_page: int = 500,
     page: int = 1
 ) -> Dict[str, Any]:
@@ -113,12 +116,12 @@ def fetch_rentals(
 
     Args:
         api_url: The StreetEasy GraphQL API endpoint
-        area_code: Area/neighborhood code (e.g., 301 for Greenpoint)
+        area_codes: List of area/neighborhood codes (e.g., [301] for Greenpoint)
         price_min: Minimum monthly rent (None for no minimum)
         price_max: Maximum monthly rent (None for no maximum)
         bedrooms_min: Minimum number of bedrooms
         bedrooms_max: Maximum number of bedrooms
-        bounding_box: Geographic bounds with topLeft and bottomRight coords
+        bounding_box: Optional geographic bounds with topLeft and bottomRight coords
         results_per_page: Number of results to fetch per page
         page: Page number for pagination
 
@@ -130,22 +133,28 @@ def fetch_rentals(
         requests.RequestException: For other request-related errors
     """
 
+    # Build filters
+    filters = {
+        "rentalStatus": "ACTIVE",
+        "areas": area_codes,
+        "price": {
+            "lowerBound": price_min,
+            "upperBound": price_max
+        },
+        "bedrooms": {
+            "lowerBound": bedrooms_min,
+            "upperBound": bedrooms_max
+        }
+    }
+
+    # Add bounding box if provided
+    if bounding_box:
+        filters["boundingBox"] = bounding_box
+
     # Query variables
     variables = {
         "input": {
-            "filters": {
-                "rentalStatus": "ACTIVE",
-                "areas": [area_code],
-                "price": {
-                    "lowerBound": price_min,
-                    "upperBound": price_max
-                },
-                "bedrooms": {
-                    "lowerBound": bedrooms_min,
-                    "upperBound": bedrooms_max
-                },
-                "boundingBox": bounding_box
-            },
+            "filters": filters,
             "page": page,
             "perPage": results_per_page,
             "sorting": {
@@ -193,12 +202,12 @@ def process_rental_response(response_data: Dict[str, Any]) -> List[RentalListing
 
 def fetch_all_rentals(
     api_url: str,
-    area_code: int,
+    area_codes: List[int],
     price_min: Optional[int],
     price_max: Optional[int],
     bedrooms_min: int,
     bedrooms_max: int,
-    bounding_box: Dict[str, Dict[str, float]],
+    bounding_box: Optional[Dict[str, Dict[str, float]]] = None,
     results_per_page: int = 500
 ) -> List[RentalListing]:
     """
@@ -206,12 +215,12 @@ def fetch_all_rentals(
 
     Args:
         api_url: The StreetEasy GraphQL API endpoint
-        area_code: Area/neighborhood code
+        area_codes: List of area/neighborhood codes
         price_min: Minimum monthly rent
         price_max: Maximum monthly rent
         bedrooms_min: Minimum number of bedrooms
         bedrooms_max: Maximum number of bedrooms
-        bounding_box: Geographic bounds
+        bounding_box: Optional geographic bounds
         results_per_page: Number of results per page
 
     Returns:
@@ -227,7 +236,7 @@ def fetch_all_rentals(
         # Fetch current page
         response_data = fetch_rentals(
             api_url=api_url,
-            area_code=area_code,
+            area_codes=area_codes,
             price_min=price_min,
             price_max=price_max,
             bedrooms_min=bedrooms_min,

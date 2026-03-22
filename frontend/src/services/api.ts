@@ -54,6 +54,7 @@ interface Favorite {
   rental_id: string
   current_state: FavoriteState
   showing_datetime: string | null
+  not_interested_reason: string | null
   is_deleted: boolean
   state_updated_at: string
   created_at: string
@@ -65,6 +66,7 @@ interface Favorite {
 interface FavoriteUpdate {
   current_state: FavoriteState
   showing_datetime?: string | null
+  not_interested_reason?: string | null
 }
 
 interface Event {

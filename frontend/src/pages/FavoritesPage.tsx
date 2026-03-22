@@ -420,22 +420,28 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
   const [showingDatetime, setShowingDatetime] = useState(
     toLocalDatetimeString(favorite.showing_datetime)
   )
+  const [notInterestedReason, setNotInterestedReason] = useState(
+    favorite.not_interested_reason || ''
+  )
   const [showHistory, setShowHistory] = useState(false)
 
   // Sync local state when favorite prop changes (after successful update)
   useEffect(() => {
     setState(favorite.current_state)
     setShowingDatetime(toLocalDatetimeString(favorite.showing_datetime))
-  }, [favorite.current_state, favorite.showing_datetime])
+    setNotInterestedReason(favorite.not_interested_reason || '')
+  }, [favorite.current_state, favorite.showing_datetime, favorite.not_interested_reason])
 
   // Track if there are unsaved changes
   const hasChanges =
     state !== favorite.current_state ||
     (state === 'showing_scheduled' &&
-      showingDatetime !== toLocalDatetimeString(favorite.showing_datetime))
+      showingDatetime !== toLocalDatetimeString(favorite.showing_datetime)) ||
+    (state === 'rejected' &&
+      notInterestedReason !== (favorite.not_interested_reason || ''))
 
   const handleSave = () => {
-    const updateData: { current_state: FavoriteState; showing_datetime?: string } = {
+    const updateData: { current_state: FavoriteState; showing_datetime?: string; not_interested_reason?: string } = {
       current_state: state,
     }
 
@@ -453,12 +459,17 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
       updateData.showing_datetime = localDate.toISOString()
     }
 
+    if (state === 'rejected' && notInterestedReason) {
+      updateData.not_interested_reason = notInterestedReason
+    }
+
     onUpdateState(favorite.id, updateData)
   }
 
   const handleCancel = () => {
     setState(favorite.current_state)
     setShowingDatetime(toLocalDatetimeString(favorite.showing_datetime))
+    setNotInterestedReason(favorite.not_interested_reason || '')
   }
 
   return (
@@ -589,6 +600,28 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                   />
                 </div>
               )}
+
+              {state === 'rejected' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>
+                    Reason (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={notInterestedReason}
+                    onChange={(e) => setNotInterestedReason(e.target.value)}
+                    disabled={isUpdating}
+                    placeholder="e.g., Too expensive, Bad location..."
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: hasChanges ? '2px solid #ffc107' : '1px solid #ccc',
+                      opacity: isUpdating ? 0.6 : 1,
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Save/Cancel buttons */}
@@ -657,6 +690,22 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                 {state === 'viewed' && 'Showing was on: '}
                 {state !== 'showing_scheduled' && state !== 'viewed' && 'Showing date: '}
                 {new Date(favorite.showing_datetime).toLocaleString()}
+              </div>
+            )}
+
+            {/* Show not interested reason if it exists and the status is rejected */}
+            {favorite.current_state === 'rejected' && favorite.not_interested_reason && (
+              <div style={{
+                marginTop: '10px',
+                padding: '10px',
+                backgroundColor: '#fef2f2',
+                borderRadius: '8px',
+                border: '1px solid #fecaca'
+              }}>
+                <strong style={{ color: '#991b1b', fontSize: '14px' }}>Not Interested Reason:</strong>
+                <div style={{ marginTop: '5px', fontSize: '14px', color: '#7f1d1d' }}>
+                  {favorite.not_interested_reason}
+                </div>
               </div>
             )}
 

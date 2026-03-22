@@ -147,6 +147,12 @@ def update_favorite(
     # Only update showing_datetime if explicitly provided
     if update_data.showing_datetime is not None:
         favorite.showing_datetime = update_data.showing_datetime
+    # Update not_interested_reason if state is rejected
+    if new_state == "rejected" and update_data.not_interested_reason is not None:
+        favorite.not_interested_reason = update_data.not_interested_reason
+    # Clear the reason if moving away from rejected state
+    elif new_state != "rejected":
+        favorite.not_interested_reason = None
     favorite.state_updated_at = datetime.utcnow()
 
     db.commit()

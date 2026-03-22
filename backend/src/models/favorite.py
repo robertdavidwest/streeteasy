@@ -32,6 +32,7 @@ class Favorite(Base):
         String, nullable=False, default="interested"
     )  # interested, reached_out, showing_scheduled, viewed, applied, rejected
     showing_datetime = Column(DateTime, nullable=True)
+    not_interested_reason = Column(String, nullable=True)
     is_deleted = Column(Boolean, nullable=False, default=False)
     state_updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

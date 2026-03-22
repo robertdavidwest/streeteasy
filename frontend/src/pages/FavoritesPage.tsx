@@ -240,6 +240,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
   const [showingDatetime, setShowingDatetime] = useState(
     favorite.showing_datetime ? new Date(favorite.showing_datetime).toISOString().slice(0, 16) : ''
   )
+  const [showHistory, setShowHistory] = useState(false)
 
   const handleStateChange = (newState: FavoriteState) => {
     setState(newState)
@@ -368,6 +369,63 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                       opacity: isUpdating ? 0.6 : 1,
                     }}
                   />
+                </div>
+              )}
+            </div>
+
+            {/* Always show showing datetime if it exists */}
+            {favorite.showing_datetime && (
+              <div style={{ marginTop: '10px', fontSize: '14px', color: '#6c757d' }}>
+                {state === 'showing_scheduled' && 'Showing scheduled for: '}
+                {state === 'viewed' && 'Showing was on: '}
+                {state !== 'showing_scheduled' && state !== 'viewed' && 'Showing date: '}
+                {new Date(favorite.showing_datetime).toLocaleString()}
+              </div>
+            )}
+
+            {/* History section */}
+            <div style={{ marginTop: '15px' }}>
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: 'transparent',
+                  color: '#007bff',
+                  border: '1px solid #007bff',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                }}
+              >
+                {showHistory ? '▼' : '▶'} View History
+              </button>
+
+              {showHistory && (
+                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                  <div style={{ fontSize: '14px' }}>
+                    {/* Favorited date */}
+                    <div style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #dee2e6' }}>
+                      <strong>Favorited:</strong> {new Date(favorite.created_at).toLocaleString()}
+                    </div>
+
+                    {/* State change history */}
+                    {favorite.events && favorite.events.length > 0 ? (
+                      <>
+                        <strong>State Changes:</strong>
+                        {favorite.events
+                          .sort((a, b) => new Date(b.event_date).getTime() - new Date(a.event_date).getTime())
+                          .map((event, idx) => (
+                            <div key={idx} style={{ marginTop: '5px', paddingLeft: '10px' }}>
+                              • {new Date(event.event_date).toLocaleString()} - Changed to{' '}
+                              <strong>{event.event_type.replace('_', ' ')}</strong>
+                              {event.notes && ` (${event.notes})`}
+                            </div>
+                          ))}
+                      </>
+                    ) : (
+                      <div style={{ color: '#6c757d', fontStyle: 'italic' }}>No state changes yet</div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

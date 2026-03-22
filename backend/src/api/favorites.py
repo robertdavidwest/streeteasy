@@ -144,7 +144,9 @@ def update_favorite(
 
     # Update favorite state
     favorite.current_state = new_state
-    favorite.showing_datetime = update_data.showing_datetime
+    # Only update showing_datetime if explicitly provided
+    if update_data.showing_datetime is not None:
+        favorite.showing_datetime = update_data.showing_datetime
     favorite.state_updated_at = datetime.utcnow()
 
     db.commit()

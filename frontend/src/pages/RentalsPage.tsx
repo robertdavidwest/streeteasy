@@ -383,6 +383,21 @@ export default function RentalsPage() {
                     <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
                       {formatListingTitle(rental.url)}
                     </h3>
+                    {rental.area_name && (
+                      <div style={{ marginBottom: '8px' }}>
+                        <span style={{
+                          backgroundColor: '#e0e7ff',
+                          color: '#3730a3',
+                          padding: '3px 10px',
+                          borderRadius: '12px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          display: 'inline-block'
+                        }}>
+                          {rental.area_name}
+                        </span>
+                      </div>
+                    )}
                     <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '10px' }}>
                       {rental.bedrooms === 0 ? 'Studio' : `${rental.bedrooms} Bedroom${rental.bedrooms > 1 ? 's' : ''}`}
                       {' • '}

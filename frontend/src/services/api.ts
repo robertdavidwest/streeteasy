@@ -28,6 +28,7 @@ interface Rental {
   bathrooms: number
   price: number
   image_url: string | null
+  area_name: string | null
 }
 
 interface RentalsParams {

@@ -520,6 +520,21 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
               <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
                 {formatListingTitle(favorite.rental.url)}
               </h3>
+              {favorite.rental.area_name && (
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{
+                    backgroundColor: '#e0e7ff',
+                    color: '#3730a3',
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    display: 'inline-block'
+                  }}>
+                    {favorite.rental.area_name}
+                  </span>
+                </div>
+              )}
               <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '10px' }}>
                 {favorite.rental.bedrooms === 0
                   ? 'Studio'
@@ -858,6 +873,21 @@ function DeletedFavoriteCard({
               <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>
                 {formatListingTitle(favorite.rental.url)}
               </h3>
+              {favorite.rental.area_name && (
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{
+                    backgroundColor: '#e0e7ff',
+                    color: '#3730a3',
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    display: 'inline-block'
+                  }}>
+                    {favorite.rental.area_name}
+                  </span>
+                </div>
+              )}
               <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '10px' }}>
                 {favorite.rental.bedrooms === 0
                   ? 'Studio'

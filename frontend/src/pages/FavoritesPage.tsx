@@ -423,6 +423,15 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
   const [notInterestedReason, setNotInterestedReason] = useState(
     favorite.not_interested_reason || ''
   )
+  const [interestedReason, setInterestedReason] = useState(
+    favorite.interested_reason || ''
+  )
+  const [appliedReason, setAppliedReason] = useState(
+    favorite.applied_reason || ''
+  )
+  const [viewedReason, setViewedReason] = useState(
+    favorite.viewed_reason || ''
+  )
   const [showHistory, setShowHistory] = useState(false)
 
   // Sync local state when favorite prop changes (after successful update)
@@ -430,7 +439,10 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
     setState(favorite.current_state)
     setShowingDatetime(toLocalDatetimeString(favorite.showing_datetime))
     setNotInterestedReason(favorite.not_interested_reason || '')
-  }, [favorite.current_state, favorite.showing_datetime, favorite.not_interested_reason])
+    setInterestedReason(favorite.interested_reason || '')
+    setAppliedReason(favorite.applied_reason || '')
+    setViewedReason(favorite.viewed_reason || '')
+  }, [favorite.current_state, favorite.showing_datetime, favorite.not_interested_reason, favorite.interested_reason, favorite.applied_reason, favorite.viewed_reason])
 
   // Track if there are unsaved changes
   const hasChanges =
@@ -438,10 +450,16 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
     (state === 'showing_scheduled' &&
       showingDatetime !== toLocalDatetimeString(favorite.showing_datetime)) ||
     (state === 'rejected' &&
-      notInterestedReason !== (favorite.not_interested_reason || ''))
+      notInterestedReason !== (favorite.not_interested_reason || '')) ||
+    (state === 'interested' &&
+      interestedReason !== (favorite.interested_reason || '')) ||
+    (state === 'applied' &&
+      appliedReason !== (favorite.applied_reason || '')) ||
+    (state === 'viewed' &&
+      viewedReason !== (favorite.viewed_reason || ''))
 
   const handleSave = () => {
-    const updateData: { current_state: FavoriteState; showing_datetime?: string; not_interested_reason?: string } = {
+    const updateData: { current_state: FavoriteState; showing_datetime?: string; not_interested_reason?: string; interested_reason?: string; applied_reason?: string; viewed_reason?: string } = {
       current_state: state,
     }
 
@@ -463,6 +481,18 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
       updateData.not_interested_reason = notInterestedReason
     }
 
+    if (state === 'interested' && interestedReason) {
+      updateData.interested_reason = interestedReason
+    }
+
+    if (state === 'applied' && appliedReason) {
+      updateData.applied_reason = appliedReason
+    }
+
+    if (state === 'viewed' && viewedReason) {
+      updateData.viewed_reason = viewedReason
+    }
+
     onUpdateState(favorite.id, updateData)
   }
 
@@ -470,6 +500,9 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
     setState(favorite.current_state)
     setShowingDatetime(toLocalDatetimeString(favorite.showing_datetime))
     setNotInterestedReason(favorite.not_interested_reason || '')
+    setInterestedReason(favorite.interested_reason || '')
+    setAppliedReason(favorite.applied_reason || '')
+    setViewedReason(favorite.viewed_reason || '')
   }
 
   return (
@@ -616,6 +649,72 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                 </div>
               )}
 
+              {state === 'interested' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>
+                    Comment (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={interestedReason}
+                    onChange={(e) => setInterestedReason(e.target.value)}
+                    disabled={isUpdating}
+                    placeholder="e.g., Great location, good price..."
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: hasChanges ? '2px solid #ffc107' : '1px solid #ccc',
+                      opacity: isUpdating ? 0.6 : 1,
+                    }}
+                  />
+                </div>
+              )}
+
+              {state === 'applied' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>
+                    Comment (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={appliedReason}
+                    onChange={(e) => setAppliedReason(e.target.value)}
+                    disabled={isUpdating}
+                    placeholder="e.g., Applied via broker, submitted application..."
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: hasChanges ? '2px solid #ffc107' : '1px solid #ccc',
+                      opacity: isUpdating ? 0.6 : 1,
+                    }}
+                  />
+                </div>
+              )}
+
+              {state === 'viewed' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>
+                    Comment (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={viewedReason}
+                    onChange={(e) => setViewedReason(e.target.value)}
+                    disabled={isUpdating}
+                    placeholder="e.g., Nice but small, good amenities..."
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: hasChanges ? '2px solid #ffc107' : '1px solid #ccc',
+                      opacity: isUpdating ? 0.6 : 1,
+                    }}
+                  />
+                </div>
+              )}
+
               {state === 'rejected' && (
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>
@@ -705,6 +804,54 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                 {state === 'viewed' && 'Showing was on: '}
                 {state !== 'showing_scheduled' && state !== 'viewed' && 'Showing date: '}
                 {new Date(favorite.showing_datetime).toLocaleString()}
+              </div>
+            )}
+
+            {/* Show interested reason (permanent comment) if it exists */}
+            {favorite.interested_reason && (
+              <div style={{
+                marginTop: '10px',
+                padding: '10px',
+                backgroundColor: '#f0f9ff',
+                borderRadius: '8px',
+                border: '1px solid #bae6fd'
+              }}>
+                <strong style={{ color: '#075985', fontSize: '14px' }}>Interested Comment:</strong>
+                <div style={{ marginTop: '5px', fontSize: '14px', color: '#0c4a6e' }}>
+                  {favorite.interested_reason}
+                </div>
+              </div>
+            )}
+
+            {/* Show applied reason (permanent comment) if it exists */}
+            {favorite.applied_reason && (
+              <div style={{
+                marginTop: '10px',
+                padding: '10px',
+                backgroundColor: '#e0f2fe',
+                borderRadius: '8px',
+                border: '1px solid #7dd3fc'
+              }}>
+                <strong style={{ color: '#0369a1', fontSize: '14px' }}>Applied Comment:</strong>
+                <div style={{ marginTop: '5px', fontSize: '14px', color: '#075985' }}>
+                  {favorite.applied_reason}
+                </div>
+              </div>
+            )}
+
+            {/* Show viewed reason (permanent comment) if it exists */}
+            {favorite.viewed_reason && (
+              <div style={{
+                marginTop: '10px',
+                padding: '10px',
+                backgroundColor: '#f3e8ff',
+                borderRadius: '8px',
+                border: '1px solid #d8b4fe'
+              }}>
+                <strong style={{ color: '#6b21a8', fontSize: '14px' }}>Viewed Comment:</strong>
+                <div style={{ marginTop: '5px', fontSize: '14px', color: '#581c87' }}>
+                  {favorite.viewed_reason}
+                </div>
               </div>
             )}
 

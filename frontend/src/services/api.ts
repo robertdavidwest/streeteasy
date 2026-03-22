@@ -56,6 +56,9 @@ interface Favorite {
   current_state: FavoriteState
   showing_datetime: string | null
   not_interested_reason: string | null
+  interested_reason: string | null
+  applied_reason: string | null
+  viewed_reason: string | null
   is_deleted: boolean
   state_updated_at: string
   created_at: string
@@ -68,6 +71,9 @@ interface FavoriteUpdate {
   current_state: FavoriteState
   showing_datetime?: string | null
   not_interested_reason?: string | null
+  interested_reason?: string | null
+  applied_reason?: string | null
+  viewed_reason?: string | null
 }
 
 interface Event {

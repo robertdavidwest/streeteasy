@@ -138,28 +138,34 @@ npm run dev
 
 ### Render.com Deployment
 
-**Backend Service:**
-- Root Directory: `backend/`
-- Build Command: Docker
-- Environment Variables: `DATABASE_URL`
+**Backend Service (Web Service):**
+- Environment: Python 3
+- Build Command: `cd backend && pip install uv && uv pip install -e .`
+- Start Command: `cd backend && uvicorn src.main:app --host 0.0.0.0 --port $PORT`
+- Environment Variables: `DATABASE_URL`, `SECRET_KEY`
 
-**Frontend Service:**
-- Root Directory: `frontend/`
-- Build Command: Docker
+**Frontend Service (Static Site):**
+- Build Command: `cd frontend && npm install && npm run build`
+- Publish Directory: `frontend/dist`
 - Environment Variables: `VITE_API_URL`
 
 **Database:**
 - Hosted on Railway.com (existing setup)
+
+**Post-Deployment:**
+- Run migrations on backend: `cd backend && .venv/bin/alembic upgrade head`
 
 See [PROJECT_SPEC.md](./PROJECT_SPEC.md) for detailed deployment instructions.
 
 ## Features
 
 ### Current (MVP)
-- Browse all scraped StreetEasy listings
-- Mark listings as favorites
+- Browse all scraped StreetEasy listings with filters (price, bedrooms)
+- Mark listings as favorites with state tracking
+- Soft delete favorites with restore capability
 - Add timestamped events (reach outs, viewings, applications)
 - Add notes to events
+- Schedule showing datetime for favorites
 - Responsive web design
 
 ### Planned
@@ -177,11 +183,10 @@ streeteasilyandme/
 ├── backend/           # FastAPI backend
 │   ├── src/
 │   ├── alembic/       # Database migrations
-│   └── Dockerfile
+│   └── pyproject.toml
 ├── frontend/          # React frontend
 │   ├── src/
-│   └── Dockerfile
-├── docker-compose.yml # Local development
+│   └── package.json
 ├── PROJECT_SPEC.md    # Technical specification
 └── README.md          # This file
 ```

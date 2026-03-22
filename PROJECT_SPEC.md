@@ -67,8 +67,7 @@ streeteasilyandme/
 │   │   └── main.py            # FastAPI app entry point
 │   ├── alembic/               # Database migrations
 │   ├── tests/
-│   ├── Dockerfile
-│   ├── requirements.txt
+│   ├── pyproject.toml
 │   └── README.md
 │
 ├── frontend/
@@ -79,11 +78,9 @@ streeteasilyandme/
 │   │   ├── hooks/            # Custom React hooks
 │   │   └── App.tsx           # Main app component
 │   ├── public/
-│   ├── Dockerfile
 │   ├── package.json
 │   └── README.md
 │
-├── docker-compose.yml         # Local development setup
 ├── PROJECT_SPEC.md            # This file
 └── README.md                  # Main project documentation
 ```
@@ -252,19 +249,29 @@ Each favorited listing maintains a timestamped event history:
 ## Deployment
 
 ### Render.com Setup
-**Backend Service:**
-- Build: Docker
-- Root directory: `backend/`
-- Environment variables: DATABASE_URL (from Railway)
+**Backend Service (Web Service):**
+- Environment: Python 3
+- Build Command: `cd backend && pip install uv && uv pip install -e .`
+- Start Command: `cd backend && uvicorn src.main:app --host 0.0.0.0 --port $PORT`
+- Root directory: `/`
+- Environment variables:
+  - `DATABASE_URL` (from Railway)
+  - `SECRET_KEY` (generate with `openssl rand -hex 32`)
 
-**Frontend Service:**
-- Build: Docker (multi-stage: build + nginx serve)
-- Root directory: `frontend/`
-- Environment variables: VITE_API_URL (backend service URL)
+**Frontend Service (Static Site):**
+- Build Command: `cd frontend && npm install && npm run build`
+- Publish directory: `frontend/dist`
+- Root directory: `/`
+- Environment variables:
+  - `VITE_API_URL` (backend service URL)
+
+**Post-Deployment:**
+- Run migrations: SSH into backend service or use Render Shell
+  - `cd backend && .venv/bin/alembic upgrade head`
 
 ### Database
 - PostgreSQL on Railway.com (existing)
-- Run migrations via Alembic on backend deployment
+- Connect via `DATABASE_URL` environment variable
 
 ## Future Enhancements
 

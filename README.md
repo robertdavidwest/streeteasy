@@ -56,14 +56,12 @@ cp .env.example .env
 # Edit .env with your local database URL:
 # DATABASE_URL=postgresql://YOUR_USERNAME@localhost:5432/streeteasy
 
-# Create initial migration for new tables (users, favorites, events)
-alembic revision --autogenerate -m "Add users, favorites, events tables"
-
-# Run migrations
-alembic upgrade head
+# Run migrations to create tables
+.venv/bin/alembic upgrade head
 
 # Start backend server
-uvicorn src.main:app --reload --port 8000
+./start_server.sh
+# Or manually: uvicorn src.main:app --reload --port 8000
 ```
 
 Backend will be available at:

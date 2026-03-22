@@ -1,3 +1,3 @@
 #!/bin/bash
 cd "$(dirname "$0")"
-.venv/bin/alembic revision --autogenerate -m "Add users, favorites, events tables"
+.venv/bin/alembic revision --autogenerate -m "Update EventType enum to match favorite states"

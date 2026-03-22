@@ -36,15 +36,24 @@ Required environment variables:
 
 ### Database Migrations
 
-```bash
-# Create a new migration
-alembic revision --autogenerate -m "description"
+**Local Development:**
 
+```bash
 # Run migrations
-alembic upgrade head
+.venv/bin/alembic upgrade head
+
+# Create a new migration (after model changes)
+.venv/bin/alembic revision --autogenerate -m "description"
 
 # Rollback
-alembic downgrade -1
+.venv/bin/alembic downgrade -1
+```
+
+**Production (Railway.com):**
+
+```bash
+# Run migrations on production database
+cd backend && DATABASE_URL=$RAILWAY_DATABASE_URL .venv/bin/alembic upgrade head
 ```
 
 ### Running Locally
@@ -86,10 +95,13 @@ backend/
 - `GET /api/rentals/{id}` - Get rental detail
 
 ### Favorites
-- `GET /api/favorites` - List user's favorites
+- `GET /api/favorites` - List user's favorites (includes soft-deleted)
 - `POST /api/favorites` - Add favorite
 - `GET /api/favorites/{id}` - Get favorite detail
-- `DELETE /api/favorites/{id}` - Remove favorite
+- `PUT /api/favorites/{id}` - Update favorite state
+- `DELETE /api/favorites/{id}` - Soft delete favorite
+- `PATCH /api/favorites/{id}/restore` - Restore soft-deleted favorite
+- `DELETE /api/favorites/{id}/permanent` - Permanently delete favorite
 
 ### Events
 - `POST /api/favorites/{id}/events` - Add event to favorite

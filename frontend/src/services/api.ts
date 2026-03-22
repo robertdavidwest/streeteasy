@@ -37,6 +37,7 @@ interface RentalsParams {
   max_price?: number
   min_bedrooms?: number
   max_bedrooms?: number
+  search?: string
 }
 
 interface Favorite {
@@ -120,6 +121,7 @@ export const rentalsApi = {
     if (params?.max_price !== undefined) queryParams.set('max_price', params.max_price.toString())
     if (params?.min_bedrooms !== undefined) queryParams.set('min_bedrooms', params.min_bedrooms.toString())
     if (params?.max_bedrooms !== undefined) queryParams.set('max_bedrooms', params.max_bedrooms.toString())
+    if (params?.search !== undefined) queryParams.set('search', params.search)
 
     const url = `${API_URL}/api/rentals?${queryParams.toString()}`
     const response = await fetch(url, {

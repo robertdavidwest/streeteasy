@@ -20,6 +20,7 @@ def list_rentals(
     max_price: Optional[int] = None,
     min_bedrooms: Optional[int] = None,
     max_bedrooms: Optional[int] = None,
+    search: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[Rental]:
@@ -39,6 +40,10 @@ def list_rentals(
         query = query.filter(Rental.bedrooms >= min_bedrooms)
     if max_bedrooms is not None:
         query = query.filter(Rental.bedrooms <= max_bedrooms)
+    if search is not None:
+        # Replace spaces with hyphens to match URL format
+        search_term = search.replace(" ", "-")
+        query = query.filter(Rental.url.ilike(f"%{search_term}%"))
 
     # Order by ID descending and paginate
     rentals = (

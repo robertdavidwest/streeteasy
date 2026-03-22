@@ -16,6 +16,7 @@ export default function RentalsPage() {
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
   const [bedrooms, setBedrooms] = useState('')
+  const [search, setSearch] = useState('')
 
   // Pagination
   const [page, setPage] = useState(0)
@@ -34,6 +35,7 @@ export default function RentalsPage() {
         ...(minPrice && { min_price: parseInt(minPrice) }),
         ...(maxPrice && { max_price: parseInt(maxPrice) }),
         ...(bedrooms && { min_bedrooms: parseInt(bedrooms), max_bedrooms: parseInt(bedrooms) }),
+        ...(search && { search }),
       }
 
       const data = await rentalsApi.list(token, params)
@@ -109,6 +111,7 @@ export default function RentalsPage() {
     setMinPrice('')
     setMaxPrice('')
     setBedrooms('')
+    setSearch('')
     setPage(0)
     setTimeout(loadRentals, 0)
   }
@@ -130,6 +133,16 @@ export default function RentalsPage() {
       {/* Filters */}
       <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '20px' }}>
         <h3 style={{ marginTop: 0 }}>Filters</h3>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Search Address</label>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="e.g. mcguinness, brooklyn, etc."
+            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Min Price</label>

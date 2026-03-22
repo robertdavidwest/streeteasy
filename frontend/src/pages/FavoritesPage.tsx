@@ -180,7 +180,9 @@ export default function FavoritesPage() {
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px' }}>StreetEasyAndMe</h1>
+            <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
+              <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', cursor: 'pointer' }}>StreetEasyAndMe</h1>
+            </Link>
             <nav style={{ display: 'flex', gap: '30px' }}>
               <Link
                 to="/"
@@ -511,7 +513,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
             </div>
           )}
 
-          <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #dee2e6' }}>
+          <form onSubmit={(e) => { e.preventDefault(); if (hasChanges && !(state === 'showing_scheduled' && !showingDatetime)) handleSave(); }} style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #dee2e6' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>
@@ -564,7 +566,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
             {hasChanges && (
               <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
                 <button
-                  onClick={handleSave}
+                  type="submit"
                   disabled={isUpdating || (state === 'showing_scheduled' && !showingDatetime)}
                   style={{
                     padding: '10px 20px',
@@ -590,6 +592,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                   {isUpdating ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button
+                  type="button"
                   onClick={handleCancel}
                   disabled={isUpdating}
                   style={{
@@ -631,6 +634,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
             {/* History section */}
             <div style={{ marginTop: '20px' }}>
               <button
+                type="button"
                 onClick={() => setShowHistory(!showHistory)}
                 style={{
                   padding: '8px 16px',
@@ -684,7 +688,7 @@ function FavoriteCard({ favorite, onUpdateState, onRemove, isRemoving, isUpdatin
                 </div>
               )}
             </div>
-          </div>
+          </form>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexShrink: 0 }}>

@@ -129,7 +129,9 @@ export default function RentalsPage() {
       >
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px' }}>StreetEasyAndMe</h1>
+            <Link to="/" style={{ textDecoration: 'none', color: 'white' }}>
+              <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '700', letterSpacing: '-0.5px', cursor: 'pointer' }}>StreetEasyAndMe</h1>
+            </Link>
             <nav style={{ display: 'flex', gap: '30px' }}>
               <Link
                 to="/"
@@ -221,7 +223,7 @@ export default function RentalsPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '20px' }}>
+      <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }} style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '20px' }}>
         <h3 style={{ marginTop: 0 }}>Filters</h3>
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Search Address</label>
@@ -272,7 +274,7 @@ export default function RentalsPage() {
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
-            onClick={handleApplyFilters}
+            type="submit"
             style={{
               padding: '10px 24px',
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -297,6 +299,7 @@ export default function RentalsPage() {
             Apply Filters
           </button>
           <button
+            type="button"
             onClick={handleClearFilters}
             style={{
               padding: '10px 24px',
@@ -319,7 +322,7 @@ export default function RentalsPage() {
             Clear
           </button>
         </div>
-      </div>
+      </form>
 
       {error && (
         <div style={{ padding: '15px', marginBottom: '20px', backgroundColor: '#fee', color: '#c33', borderRadius: '4px' }}>
@@ -422,8 +425,8 @@ export default function RentalsPage() {
                       {favoritingId === rental.id
                         ? '...'
                         : isFavorited(rental.id)
-                        ? '✓ Favorited'
-                        : '★ Favorite'}
+                        ? '✓ In My Listings'
+                        : '+ Add to Listings'}
                     </button>
                   </div>
                 </div>

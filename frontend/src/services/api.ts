@@ -39,6 +39,7 @@ interface RentalsParams {
   min_bedrooms?: number
   max_bedrooms?: number
   search?: string
+  areas?: string[]
 }
 
 type FavoriteState =
@@ -148,6 +149,9 @@ export const rentalsApi = {
     if (params?.min_bedrooms !== undefined) queryParams.set('min_bedrooms', params.min_bedrooms.toString())
     if (params?.max_bedrooms !== undefined) queryParams.set('max_bedrooms', params.max_bedrooms.toString())
     if (params?.search !== undefined) queryParams.set('search', params.search)
+    if (params?.areas !== undefined && params.areas.length > 0) {
+      params.areas.forEach(area => queryParams.append('areas', area))
+    }
 
     const url = `${API_URL}/api/rentals?${queryParams.toString()}`
     const response = await fetch(url, {
@@ -165,6 +169,15 @@ export const rentalsApi = {
       },
     })
     return handleResponse<Rental>(response)
+  },
+
+  async getAreas(token: string): Promise<string[]> {
+    const response = await fetch(`${API_URL}/api/rentals/areas`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return handleResponse<string[]>(response)
   },
 }
 

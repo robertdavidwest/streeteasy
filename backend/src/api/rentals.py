@@ -21,6 +21,7 @@ def list_rentals(
     min_bedrooms: Optional[int] = None,
     max_bedrooms: Optional[int] = None,
     search: Optional[str] = None,
+    areas: Optional[list[str]] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[Rental]:
@@ -44,12 +45,30 @@ def list_rentals(
         # Replace spaces with hyphens to match URL format
         search_term = search.replace(" ", "-")
         query = query.filter(Rental.url.ilike(f"%{search_term}%"))
+    if areas is not None and len(areas) > 0:
+        query = query.filter(Rental.area_name.in_(areas))
 
     # Order by ID descending and paginate
     rentals = (
         query.order_by(Rental.id.desc()).offset(skip).limit(limit).all()
     )
     return rentals
+
+
+@router.get("/areas", response_model=list[str])
+def get_available_areas(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[str]:
+    """Get list of distinct area names from available rentals."""
+    areas = (
+        db.query(Rental.area_name)
+        .filter(Rental.area_name.isnot(None))
+        .distinct()
+        .order_by(Rental.area_name)
+        .all()
+    )
+    return [area[0] for area in areas]
 
 
 @router.get("/{rental_id}", response_model=RentalResponse)

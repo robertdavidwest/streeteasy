@@ -11,12 +11,14 @@ export default function RentalsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [favoritingId, setFavoritingId] = useState<string | null>(null)
+  const [availableAreas, setAvailableAreas] = useState<string[]>([])
 
   // Filters
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
   const [bedrooms, setBedrooms] = useState('')
   const [search, setSearch] = useState('')
+  const [selectedAreas, setSelectedAreas] = useState<string[]>([])
 
   // Pagination
   const [page, setPage] = useState(0)
@@ -36,6 +38,7 @@ export default function RentalsPage() {
         ...(maxPrice && { max_price: parseInt(maxPrice) }),
         ...(bedrooms && { min_bedrooms: parseInt(bedrooms), max_bedrooms: parseInt(bedrooms) }),
         ...(search && { search }),
+        ...(selectedAreas.length > 0 && { areas: selectedAreas }),
       }
 
       const data = await rentalsApi.list(token, params)
@@ -58,6 +61,16 @@ export default function RentalsPage() {
       setFavorites(data)
     } catch (err) {
       console.error('Failed to load favorites:', err)
+    }
+  }
+
+  const loadAreas = async () => {
+    if (!token) return
+    try {
+      const areas = await rentalsApi.getAreas(token)
+      setAvailableAreas(areas)
+    } catch (err) {
+      console.error('Failed to load areas:', err)
     }
   }
 
@@ -102,6 +115,10 @@ export default function RentalsPage() {
     loadFavorites()
   }, [page])
 
+  useEffect(() => {
+    loadAreas()
+  }, [])
+
   const handleApplyFilters = () => {
     setPage(0)
     loadRentals()
@@ -112,8 +129,17 @@ export default function RentalsPage() {
     setMaxPrice('')
     setBedrooms('')
     setSearch('')
+    setSelectedAreas([])
     setPage(0)
     setTimeout(loadRentals, 0)
+  }
+
+  const toggleArea = (area: string) => {
+    setSelectedAreas((prev) =>
+      prev.includes(area)
+        ? prev.filter((a) => a !== area)
+        : [...prev, area]
+    )
   }
 
   return (
@@ -217,7 +243,19 @@ export default function RentalsPage() {
               fontSize: '15px',
               lineHeight: '1.5'
             }}>
-              This is an early version showing rentals in <strong>Greenpoint, Brooklyn only</strong>.
+              This is an early version showing rentals in {availableAreas.length > 0 ? (
+                <>
+                  <strong>
+                    {availableAreas.length === 1
+                      ? availableAreas[0]
+                      : availableAreas.length === 2
+                      ? `${availableAreas[0]} and ${availableAreas[1]}`
+                      : `${availableAreas.slice(0, -1).join(', ')}, and ${availableAreas[availableAreas.length - 1]}`}
+                  </strong>
+                </>
+              ) : (
+                <strong>selected Brooklyn neighborhoods</strong>
+              )}.
               The listings are automatically scraped and updated from StreetEasy.
             </p>
           </div>
@@ -227,6 +265,65 @@ export default function RentalsPage() {
       {/* Filters */}
       <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }} style={{ padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px', marginBottom: '20px' }}>
         <h3 style={{ marginTop: 0 }}>Filters</h3>
+
+        {/* Neighborhood Selector */}
+        {availableAreas.length > 0 && (
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>
+              Neighborhoods
+            </label>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              marginBottom: '10px'
+            }}>
+              {availableAreas.map((area) => (
+                <button
+                  key={area}
+                  type="button"
+                  onClick={() => toggleArea(area)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    border: selectedAreas.includes(area)
+                      ? '2px solid #667eea'
+                      : '2px solid #d1d5db',
+                    backgroundColor: selectedAreas.includes(area)
+                      ? '#667eea'
+                      : 'white',
+                    color: selectedAreas.includes(area)
+                      ? 'white'
+                      : '#4b5563',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selectedAreas.includes(area)) {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6'
+                      e.currentTarget.style.borderColor = '#9ca3af'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selectedAreas.includes(area)) {
+                      e.currentTarget.style.backgroundColor = 'white'
+                      e.currentTarget.style.borderColor = '#d1d5db'
+                    }
+                  }}
+                >
+                  {selectedAreas.includes(area) && '✓ '}
+                  {area}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Search Address</label>
           <input

@@ -298,22 +298,22 @@ export default function SignupPage() {
 
         <button
           type="submit"
-          disabled={loading || (registrationStatus && !registrationStatus.is_open)}
+          disabled={loading || (registrationStatus ? !registrationStatus.is_open : false)}
           style={{
             width: '100%',
             padding: '14px',
             fontSize: '16px',
             fontWeight: '600',
-            background: (loading || (registrationStatus && !registrationStatus.is_open))
+            background: (loading || (registrationStatus ? !registrationStatus.is_open : false))
               ? '#9ca3af'
               : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
             border: 'none',
             borderRadius: '8px',
-            cursor: (loading || (registrationStatus && !registrationStatus.is_open)) ? 'not-allowed' : 'pointer',
-            opacity: (loading || (registrationStatus && !registrationStatus.is_open)) ? 0.7 : 1,
+            cursor: (loading || (registrationStatus ? !registrationStatus.is_open : false)) ? 'not-allowed' : 'pointer',
+            opacity: (loading || (registrationStatus ? !registrationStatus.is_open : false)) ? 0.7 : 1,
             transition: 'all 0.2s',
-            boxShadow: (loading || (registrationStatus && !registrationStatus.is_open)) ? 'none' : '0 4px 6px rgba(102, 126, 234, 0.25)'
+            boxShadow: (loading || (registrationStatus ? !registrationStatus.is_open : false)) ? 'none' : '0 4px 6px rgba(102, 126, 234, 0.25)'
           }}
           onMouseEnter={(e) => {
             if (!loading && registrationStatus?.is_open) {
@@ -326,7 +326,7 @@ export default function SignupPage() {
             e.currentTarget.style.boxShadow = '0 4px 6px rgba(102, 126, 234, 0.25)'
           }}
         >
-          {loading ? 'Creating account...' : (registrationStatus && !registrationStatus.is_open) ? 'Registration Closed' : 'Sign Up'}
+          {loading ? 'Creating account...' : (registrationStatus ? (!registrationStatus.is_open ? 'Registration Closed' : 'Sign Up') : 'Sign Up')}
         </button>
       </form>
 

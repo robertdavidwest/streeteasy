@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from src.core.config import settings
 from src.core.database import get_db
 from src.models.user import User
 from src.schemas.user import UserCreate, UserResponse, Token
@@ -21,14 +22,14 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)) -> User:
     """
     Register a new user.
 
-    Only allows first user to sign up, then disables registration.
+    Only allows max_users (from config) to sign up, then disables registration.
     """
-    # Check if any users exist
+    # Check if max users reached
     existing_user_count = db.query(User).count()
-    if existing_user_count > 0:
+    if existing_user_count >= settings.max_users:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Registration is closed. First user already registered.",
+            detail=f"Registration is closed. Maximum of {settings.max_users} user(s) already registered.",
         )
 
     # Check if email already exists (redundant but good practice)
@@ -83,3 +84,20 @@ def login(
 def get_me(current_user: User = Depends(get_current_user)) -> User:
     """Get current user info."""
     return current_user
+
+
+@router.get("/registration-status")
+def get_registration_status(db: Session = Depends(get_db)) -> dict:
+    """
+    Check if registration is available.
+
+    Returns info about registration availability and user limits.
+    This endpoint is public (no auth required).
+    """
+    current_user_count = db.query(User).count()
+    return {
+        "is_open": current_user_count < settings.max_users,
+        "current_users": current_user_count,
+        "max_users": settings.max_users,
+        "slots_available": max(0, settings.max_users - current_user_count)
+    }

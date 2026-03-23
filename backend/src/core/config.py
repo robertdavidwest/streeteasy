@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     # Environment
     environment: str = "development"
 
+    # User registration
+    max_users: int = 1  # Maximum number of users allowed to register
+
     class Config:
         """Pydantic config."""
 

@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authApi, ApiError } from '../services/api'
 
@@ -25,6 +25,12 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+  const [registrationStatus, setRegistrationStatus] = useState<{
+    is_open: boolean
+    current_users: number
+    max_users: number
+    slots_available: number
+  } | null>(null)
   const navigate = useNavigate()
 
   const getPasswordStrength = () => {
@@ -34,6 +40,19 @@ export default function SignupPage() {
   const isPasswordValid = () => {
     return passwordRequirements.every((req) => req.test(password))
   }
+
+  useEffect(() => {
+    // Fetch registration status on component mount
+    const fetchStatus = async () => {
+      try {
+        const status = await authApi.getRegistrationStatus()
+        setRegistrationStatus(status)
+      } catch (err) {
+        console.error('Failed to fetch registration status:', err)
+      }
+    }
+    fetchStatus()
+  }, [])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -279,23 +298,25 @@ export default function SignupPage() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (registrationStatus && !registrationStatus.is_open)}
           style={{
             width: '100%',
             padding: '14px',
             fontSize: '16px',
             fontWeight: '600',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: (loading || (registrationStatus && !registrationStatus.is_open))
+              ? '#9ca3af'
+              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
             border: 'none',
             borderRadius: '8px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
+            cursor: (loading || (registrationStatus && !registrationStatus.is_open)) ? 'not-allowed' : 'pointer',
+            opacity: (loading || (registrationStatus && !registrationStatus.is_open)) ? 0.7 : 1,
             transition: 'all 0.2s',
-            boxShadow: loading ? 'none' : '0 4px 6px rgba(102, 126, 234, 0.25)'
+            boxShadow: (loading || (registrationStatus && !registrationStatus.is_open)) ? 'none' : '0 4px 6px rgba(102, 126, 234, 0.25)'
           }}
           onMouseEnter={(e) => {
-            if (!loading) {
+            if (!loading && registrationStatus?.is_open) {
               e.currentTarget.style.transform = 'translateY(-1px)'
               e.currentTarget.style.boxShadow = '0 6px 12px rgba(102, 126, 234, 0.35)'
             }
@@ -305,7 +326,7 @@ export default function SignupPage() {
             e.currentTarget.style.boxShadow = '0 4px 6px rgba(102, 126, 234, 0.25)'
           }}
         >
-          {loading ? 'Creating account...' : 'Sign Up'}
+          {loading ? 'Creating account...' : (registrationStatus && !registrationStatus.is_open) ? 'Registration Closed' : 'Sign Up'}
         </button>
       </form>
 
@@ -325,20 +346,32 @@ export default function SignupPage() {
         </Link>
       </p>
 
-      <div
-        style={{
-          marginTop: '24px',
-          padding: '16px',
-          backgroundColor: '#fef3c7',
-          borderRadius: '8px',
-          fontSize: '14px',
-          border: '1px solid #fde68a',
-          color: '#92400e'
-        }}
-      >
-        <strong>Note:</strong> Only the first person to sign up can create an
-        account. Registration will be closed after that.
-      </div>
+      {registrationStatus && (
+        <div
+          style={{
+            marginTop: '24px',
+            padding: '16px',
+            backgroundColor: registrationStatus.is_open ? '#fef3c7' : '#fee2e2',
+            borderRadius: '8px',
+            fontSize: '14px',
+            border: registrationStatus.is_open ? '1px solid #fde68a' : '1px solid #fecaca',
+            color: registrationStatus.is_open ? '#92400e' : '#991b1b'
+          }}
+        >
+          {registrationStatus.is_open ? (
+            <>
+              <strong>Note:</strong> Only the first {registrationStatus.max_users} {registrationStatus.max_users === 1 ? 'person' : 'people'} can sign up.
+              {' '}{registrationStatus.slots_available === 1
+                ? 'There is 1 slot remaining.'
+                : `There are ${registrationStatus.slots_available} slots remaining.`}
+            </>
+          ) : (
+            <>
+              <strong>Registration Closed:</strong> Maximum of {registrationStatus.max_users} {registrationStatus.max_users === 1 ? 'user has' : 'users have'} already registered.
+            </>
+          )}
+        </div>
+      )}
       </div>
     </div>
   )

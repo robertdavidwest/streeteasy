@@ -110,6 +110,13 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json()
 }
 
+interface RegistrationStatus {
+  is_open: boolean
+  current_users: number
+  max_users: number
+  slots_available: number
+}
+
 export const authApi = {
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -136,6 +143,11 @@ export const authApi = {
       },
     })
     return handleResponse<UserResponse>(response)
+  },
+
+  async getRegistrationStatus(): Promise<RegistrationStatus> {
+    const response = await fetch(`${API_URL}/api/auth/registration-status`)
+    return handleResponse<RegistrationStatus>(response)
   },
 }
 

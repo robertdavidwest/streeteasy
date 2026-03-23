@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
-from src.api import auth, rentals, favorites, events
+from src.api import auth, rentals, favorites, events, searches
 
 # Create FastAPI app
 app = FastAPI(
@@ -23,6 +23,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix="/api")
+app.include_router(searches.router, prefix="/api")
 app.include_router(rentals.router, prefix="/api")
 app.include_router(favorites.router, prefix="/api")
 app.include_router(events.router, prefix="/api")

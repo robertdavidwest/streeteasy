@@ -1,6 +1,7 @@
 """Favorites routes."""
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.database import get_db
@@ -8,21 +9,68 @@ from src.models.user import User
 from src.models.favorite import Favorite
 from src.models.rental import Rental
 from src.models.event import Event, EventType
+from src.models.search import Search, SearchMember, MemberRole
 from src.schemas.favorite import FavoriteCreate, FavoriteUpdate, FavoriteResponse
 from src.services.auth import get_current_user
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
 
+def check_search_access(
+    search_id: str,
+    user: User,
+    db: Session,
+    require_edit: bool = False
+) -> SearchMember:
+    """Check if user has access to a search."""
+    member = (
+        db.query(SearchMember)
+        .filter(
+            SearchMember.search_id == search_id,
+            SearchMember.user_id == user.id
+        )
+        .first()
+    )
+
+    if not member:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Search not found or access denied"
+        )
+
+    if require_edit and member.role == MemberRole.viewer:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Requires editor role or higher"
+        )
+
+    return member
+
+
 @router.get("", response_model=list[FavoriteResponse])
 def list_favorites(
+    search_id: Optional[str] = Query(None, description="Filter by search ID"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[Favorite]:
-    """List all favorites for current user."""
+    """List favorites, optionally filtered by search."""
+    query = db.query(Favorite)
+
+    if search_id:
+        # Check access to the search
+        check_search_access(search_id, current_user, db)
+        query = query.filter(Favorite.search_id == search_id)
+    else:
+        # Get all favorites from searches user has access to
+        user_searches = (
+            db.query(SearchMember.search_id)
+            .filter(SearchMember.user_id == current_user.id)
+            .subquery()
+        )
+        query = query.filter(Favorite.search_id.in_(user_searches))
+
     favorites = (
-        db.query(Favorite)
-        .filter(Favorite.user_id == current_user.id)
+        query
         .options(joinedload(Favorite.rental), joinedload(Favorite.events))
         .order_by(Favorite.created_at.desc())
         .all()
@@ -36,7 +84,10 @@ def create_favorite(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Favorite:
-    """Add a rental to favorites."""
+    """Add a rental to a search."""
+    # Check access to the search (must have edit permission)
+    check_search_access(favorite_data.search_id, current_user, db, require_edit=True)
+
     # Check if rental exists
     rental = (
         db.query(Rental)
@@ -48,24 +99,27 @@ def create_favorite(
             status_code=status.HTTP_404_NOT_FOUND, detail="Rental not found"
         )
 
-    # Check if already favorited
+    # Check if already favorited in this search
     existing = (
         db.query(Favorite)
         .filter(
             Favorite.user_id == current_user.id,
             Favorite.rental_id == favorite_data.rental_id,
+            Favorite.search_id == favorite_data.search_id,
         )
         .first()
     )
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Rental already favorited",
+            detail="Rental already added to this search",
         )
 
     # Create favorite
     favorite = Favorite(
-        user_id=current_user.id, rental_id=favorite_data.rental_id
+        user_id=current_user.id,
+        rental_id=favorite_data.rental_id,
+        search_id=favorite_data.search_id
     )
     db.add(favorite)
     db.commit()

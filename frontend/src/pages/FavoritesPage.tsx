@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useSearch } from '../contexts/SearchContext'
+import SearchContextBar from '../components/SearchContextBar'
 import { favoritesApi, Favorite, FavoriteState, FavoriteUpdate, ApiError } from '../services/api'
 import { formatListingTitle } from '../utils/formatters'
 
 export default function FavoritesPage() {
   const { token, logout } = useAuth()
+  const { currentSearchId, currentSearch } = useSearch()
   const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -16,13 +19,13 @@ export default function FavoritesPage() {
   const [showDeleted, setShowDeleted] = useState(false)
 
   const loadFavorites = async () => {
-    if (!token) return
+    if (!token || !currentSearchId) return
 
     setLoading(true)
     setError('')
 
     try {
-      const data = await favoritesApi.list(token)
+      const data = await favoritesApi.list(token, currentSearchId)
       setFavorites(data)
     } catch (err) {
       if (err instanceof ApiError) {
@@ -124,6 +127,13 @@ export default function FavoritesPage() {
     loadFavorites()
   }, [])
 
+  // Reload favorites when search changes
+  useEffect(() => {
+    if (currentSearchId) {
+      loadFavorites()
+    }
+  }, [currentSearchId])
+
   // Separate active and deleted favorites
   const activeFavorites = favorites.filter((f) => !f.is_deleted)
   const deletedFavorites = favorites.filter((f) => f.is_deleted)
@@ -211,6 +221,18 @@ export default function FavoritesPage() {
               >
                 Browse Rentals
               </Link>
+              <Link
+                to="/searches"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  textDecoration: 'none',
+                  fontSize: '15px',
+                  paddingBottom: '5px',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Searches
+              </Link>
             </nav>
           </div>
           <button
@@ -239,6 +261,8 @@ export default function FavoritesPage() {
           </button>
         </div>
       </div>
+
+      <SearchContextBar />
 
       <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px' }}>
 

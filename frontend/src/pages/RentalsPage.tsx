@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useSearch } from '../contexts/SearchContext'
+import SearchContextBar from '../components/SearchContextBar'
 import { rentalsApi, favoritesApi, Rental, Favorite, ApiError } from '../services/api'
 import { formatListingTitle } from '../utils/formatters'
 
 export default function RentalsPage() {
   const { token, logout } = useAuth()
+  const { currentSearchId, currentSearch } = useSearch()
   const [rentals, setRentals] = useState<Rental[]>([])
   const [favorites, setFavorites] = useState<Favorite[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,9 +58,9 @@ export default function RentalsPage() {
   }
 
   const loadFavorites = async () => {
-    if (!token) return
+    if (!token || !currentSearchId) return
     try {
-      const data = await favoritesApi.list(token)
+      const data = await favoritesApi.list(token, currentSearchId)
       setFavorites(data)
     } catch (err) {
       console.error('Failed to load favorites:', err)
@@ -96,7 +99,11 @@ export default function RentalsPage() {
           setFavorites((prev) => prev.filter((f) => f.id !== favoriteId))
         }
       } else {
-        const newFavorite = await favoritesApi.create(token, rental.id)
+        if (!currentSearchId) {
+          setError('Please select a search first')
+          return
+        }
+        const newFavorite = await favoritesApi.create(token, rental.id, currentSearchId)
         setFavorites((prev) => [...prev, newFavorite])
       }
     } catch (err) {
@@ -118,6 +125,13 @@ export default function RentalsPage() {
   useEffect(() => {
     loadAreas()
   }, [])
+
+  // Reload favorites when search changes
+  useEffect(() => {
+    if (currentSearchId) {
+      loadFavorites()
+    }
+  }, [currentSearchId])
 
   const handleApplyFilters = () => {
     setPage(0)
@@ -186,6 +200,18 @@ export default function RentalsPage() {
               >
                 Browse Rentals
               </Link>
+              <Link
+                to="/searches"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  textDecoration: 'none',
+                  fontSize: '15px',
+                  paddingBottom: '5px',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Searches
+              </Link>
             </nav>
           </div>
           <button
@@ -214,6 +240,8 @@ export default function RentalsPage() {
           </button>
         </div>
       </div>
+
+      <SearchContextBar />
 
       <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '30px 20px' }}>
 

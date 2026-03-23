@@ -32,3 +32,9 @@ class User(Base):
     favorites = relationship(
         "Favorite", back_populates="user", cascade="all, delete-orphan"
     )
+    created_searches = relationship(
+        "Search", back_populates="creator", cascade="all, delete-orphan"
+    )
+    search_memberships = relationship(
+        "SearchMember", foreign_keys="SearchMember.user_id", back_populates="user", cascade="all, delete-orphan"
+    )

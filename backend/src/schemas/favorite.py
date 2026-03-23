@@ -22,6 +22,7 @@ class FavoriteCreate(BaseModel):
     """Schema for creating a favorite."""
 
     rental_id: str
+    search_id: UUID  # Required - which search to add this to
 
 
 class FavoriteUpdate(BaseModel):
@@ -41,6 +42,7 @@ class FavoriteResponse(BaseModel):
     id: int
     user_id: UUID
     rental_id: str
+    search_id: UUID
     current_state: str
     showing_datetime: Optional[datetime] = None
     not_interested_reason: Optional[str] = None

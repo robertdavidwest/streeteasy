@@ -194,8 +194,11 @@ export const rentalsApi = {
 }
 
 export const favoritesApi = {
-  async list(token: string): Promise<Favorite[]> {
-    const response = await fetch(`${API_URL}/api/favorites`, {
+  async list(token: string, searchId?: string): Promise<Favorite[]> {
+    const url = searchId
+      ? `${API_URL}/api/favorites?search_id=${searchId}`
+      : `${API_URL}/api/favorites`
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -203,14 +206,14 @@ export const favoritesApi = {
     return handleResponse<Favorite[]>(response)
   },
 
-  async create(token: string, rental_id: string): Promise<Favorite> {
+  async create(token: string, rental_id: string, search_id: string): Promise<Favorite> {
     const response = await fetch(`${API_URL}/api/favorites`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ rental_id }),
+      body: JSON.stringify({ rental_id, search_id }),
     })
     return handleResponse<Favorite>(response)
   },
@@ -343,5 +346,197 @@ export const eventsApi = {
   },
 }
 
+// Search types
+type MemberRole = 'owner' | 'editor' | 'viewer'
+
+interface SearchMember {
+  id: string
+  user_id: string
+  user_email: string
+  role: MemberRole
+  invited_by?: string
+  invited_at?: string
+  accepted_at?: string
+  created_at: string
+}
+
+interface Search {
+  id: string
+  name: string
+  description?: string
+  created_by: string
+  created_at: string
+  updated_at?: string
+  members: SearchMember[]
+  favorites_count: number
+  user_role?: MemberRole
+}
+
+interface SearchListItem {
+  id: string
+  name: string
+  description?: string
+  created_by: string
+  created_at: string
+  favorites_count: number
+  member_count: number
+  user_role: MemberRole
+}
+
+interface SearchCreate {
+  name: string
+  description?: string
+}
+
+interface SearchUpdate {
+  name?: string
+  description?: string
+}
+
+interface InviteMemberRequest {
+  email: string
+  role: MemberRole
+}
+
+interface SearchInvitation {
+  id: string
+  search_id: string
+  search_name: string
+  email: string
+  invited_by: string
+  inviter_email: string
+  token: string
+  expires_at: string
+  created_at: string
+}
+
+export const searchesApi = {
+  async list(token: string): Promise<SearchListItem[]> {
+    const response = await fetch(`${API_URL}/api/searches`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return handleResponse<SearchListItem[]>(response)
+  },
+
+  async getById(token: string, id: string): Promise<Search> {
+    const response = await fetch(`${API_URL}/api/searches/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return handleResponse<Search>(response)
+  },
+
+  async create(token: string, data: SearchCreate): Promise<Search> {
+    const response = await fetch(`${API_URL}/api/searches`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Search>(response)
+  },
+
+  async update(token: string, id: string, data: SearchUpdate): Promise<Search> {
+    const response = await fetch(`${API_URL}/api/searches/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<Search>(response)
+  },
+
+  async delete(token: string, id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/api/searches/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to delete search',
+        response.status,
+        error
+      )
+    }
+  },
+
+  async inviteMember(token: string, searchId: string, data: InviteMemberRequest): Promise<SearchInvitation> {
+    const response = await fetch(`${API_URL}/api/searches/${searchId}/members`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+    return handleResponse<SearchInvitation>(response)
+  },
+
+  async acceptInvitation(token: string, invitationToken: string): Promise<void> {
+    const response = await fetch(`${API_URL}/api/searches/invitations/accept`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ token: invitationToken }),
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to accept invitation',
+        response.status,
+        error
+      )
+    }
+  },
+
+  async removeMember(token: string, searchId: string, memberId: string): Promise<void> {
+    const response = await fetch(`${API_URL}/api/searches/${searchId}/members/${memberId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to remove member',
+        response.status,
+        error
+      )
+    }
+  },
+
+  async updateMemberRole(token: string, searchId: string, memberId: string, role: MemberRole): Promise<void> {
+    const response = await fetch(`${API_URL}/api/searches/${searchId}/members/${memberId}/role`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ role }),
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new ApiError(
+        error.detail || 'Failed to update member role',
+        response.status,
+        error
+      )
+    }
+  },
+}
+
 export { ApiError }
-export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams, Favorite, FavoriteState, FavoriteUpdate, Event, EventCreate, EventUpdate }
+export type { LoginRequest, SignupRequest, AuthResponse, UserResponse, Rental, RentalsParams, Favorite, FavoriteState, FavoriteUpdate, Event, EventCreate, EventUpdate, Search, SearchListItem, SearchCreate, SearchUpdate, SearchMember, MemberRole, InviteMemberRequest, SearchInvitation }

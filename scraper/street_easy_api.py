@@ -65,10 +65,12 @@ def extract_listing_data(node: Dict[str, Any]) -> RentalListing:
     # Extract photo and build image URL
     lead_media = node.get('leadMedia', {})
     if lead_media and 'photo' in lead_media:
-        photo_key = lead_media['photo'].get('key')
-        if photo_key:
-            # StreetEasy uses Zillow's CDN for images
-            listing['image_url'] = f"https://photos.zillowstatic.com/fp/{photo_key}-se_extra_large_1500_800.webp"
+        photo = lead_media['photo']
+        if photo:
+            photo_key = lead_media['photo'].get('key')
+            if photo_key:
+                # StreetEasy uses Zillow's CDN for images
+                listing['image_url'] = f"https://photos.zillowstatic.com/fp/{photo_key}-se_extra_large_1500_800.webp"
     else:
         listing['image_url'] = None
 

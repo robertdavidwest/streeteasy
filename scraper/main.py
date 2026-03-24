@@ -89,7 +89,6 @@ if __name__ == "__main__":
                     SEARCH_CONFIG['bedrooms_min'],
                     SEARCH_CONFIG['bedrooms_max']
                 )
-                pass
             print("✅ Sent notifications via Telegram")
         else:
             print("📝 First run - skipping Telegram notifications")
